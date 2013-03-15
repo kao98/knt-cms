@@ -77,7 +77,7 @@ class Framework
         
         $instance = new Framework($request);
 
-        $instance->getController()->handle();
+        $instance->getView()->render();
 
         return $instance;
 
@@ -86,17 +86,17 @@ class Framework
     /**
      *
      */
-    public function getController($requestedController = null) {
+    public function getView($requestedView = null) {
 
-        $controllerPath = trim(BASE_PATH, '\\/') . '/' . trim(CONTROLLERS_PATH, '\\/');
+        $viewPath   = trim(BASE_PATH, '\\/') . '/' . trim(VIEWS_PATH, '\\/');
+        $viewFile   = null;
+        $class      = null;
+        $action     = null;
 
-        $controllerFile = null;
-        $class          = null;
-        $action         = null;
+        $viewFile   = $this->_retrieveView($viewPath, $class, $action, $requestedView ?: $this->request->path);
 
-        $controllerFile = $this->_retrieveController($controllerPath, $class, $action, $requestedController ?: $this->request->path);
-        if ($controllerFile !== null) {
-            require($controllerFile);
+        if ($viewFile !== null) {
+            require($viewFile);
             return new $class;
         }
 
@@ -106,23 +106,23 @@ class Framework
     }
 
     /**
-     * Retrieve the controller file for the given requested path.
-     * The requested path basically include controller path, name, then action to do.
-     * But it may also be only a controller path and name (action will be the default one),
-     * or only a controller path (controller name and action name will be the default ones).
+     * Retrieve the view file for the given requested path.
+     * The requested path basically include view path, name, then action to do.
+     * But it may also be only a view path and name (action will be the default one),
+     * or only a view path (view name and action name will be the default ones).
      *
-     * @param string $controllerPath The path where to look for controllers
-     * @param &string &$controllerName Will return the name of the desired controller
+     * @param string $viewPath The path where to look for views
+     * @param &string &$viewName Will return the name of the desired view
      * @param &string &$actionName Will return the name of the desired action
      * @param string $requestedPath The requested path. 
-     * If empty it will look for a default controller (default '').
-     * @return string The full path of the file containing the desired controller
+     * If empty it will look for a default view (default '').
+     * @return string The full path of the file containing the desired view
      */
-    protected function _retrieveController($controllerPath, &$controllerName, &$actionName, $requestedPath = '') {
+    protected function _retrieveView($viewPath, &$viewName, &$actionName, $requestedPath = '') {
 
-        //The controller path should be a valid directory.
-        if (!is_dir($controllerPath))
-            throw new Exception\KntFrameworkException('Please review the framework configuration. The base controllers path seems to not exists');
+        //The view path should be a valid directory.
+        if (!is_dir($viewPath))
+            throw new Exception\KntFrameworkException('Please review the framework configuration. The base views path seems to not exists');
 
         
         $requestedPath      = trim($requestedPath, '/');
@@ -136,49 +136,49 @@ class Framework
         //If we have a requested action but no requested path, the requested action is actually the requested path
         if (strlen($requestedPath) == 0 && strlen($requestedAction) > 0) {
             $requestedPath      = $requestedAction;
-            $requestedAction    = CONTROLLERS_INDEX;
+            $requestedAction    = VIEWS_INDEX;
         }
 
-        //If no requested path, we will look for the default controller
-        $requestedPath      = $requestedPath    ?: DEFAULT_CONTROLLER;
+        //If no requested path, we will look for the default view
+        $requestedPath      = $requestedPath    ?: DEFAULT_VIEW;
 
         //If no requested action,we will use the default action
-        $requestedAction    = $requestedAction  ?: CONTROLLERS_INDEX;
+        $requestedAction    = $requestedAction  ?: VIEWS_INDEX;
 
 
-        $possibleControllerFiles = array(
+        $possibleViewFiles = array(
             //The request is well formed
-            //Example: /Controller/action => Controller.php, Folder/Controller/action => Folder/Controller.php
-            $controllerPath . '/' . $requestedPath . CONTROLLERS_EXTENSION
+            //Example: /View/action => View.php, Folder/View/action => Folder/View.php
+            $viewPath . '/' . $requestedPath . VIEWS_EXTENSION
                 => $requestedAction,
 
-            //The action is actually the controller. Action will be the default one
-            //Example: /Folder/Controller => Folder/Controller.php (action => index)
-            $controllerPath . '/' . $requestedPath . '/' . $requestedAction . CONTROLLERS_EXTENSION
-                => CONTROLLERS_INDEX,
+            //The action is actually the view. Action will be the default one
+            //Example: /Folder/View => Folder/View.php (action => index)
+            $viewPath . '/' . $requestedPath . '/' . $requestedAction . VIEWS_EXTENSION
+                => VIEWS_INDEX,
             
-            //The controller is actually the folder which contains controllers. The requested controller may be the default one. No action were requested
+            //The view is actually the folder which contains views. The requested view may be the default one. No action were requested
             //Example: /Folder => Folder/Index.php (action => index)
-            $controllerPath . '/' . $requestedPath . '/' . DEFAULT_CONTROLLER . CONTROLLERS_EXTENSION
+            $viewPath . '/' . $requestedPath . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
                 => $requestedAction,
             
-            //The requested action is actually the folder wich contains the controllers. The requested controller may be the default one.
-            //Example: /Folder/Controller => /Folder/Controller/Index.php (action => index)
-            $controllerPath . '/' . $requestedPath . '/' . $requestedAction . '/' . DEFAULT_CONTROLLER . CONTROLLERS_EXTENSION
-                => CONTROLLERS_INDEX
+            //The requested action is actually the folder wich contains the views. The requested view may be the default one.
+            //Example: /Folder/View => /Folder/View/Index.php (action => index)
+            $viewPath . '/' . $requestedPath . '/' . $requestedAction . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
+                => VIEWS_INDEX
         );
 
         //The first found will be the good one. Other ones will be ignored.
-        foreach ($possibleControllerFiles as $possibleControllerFile => $possibleAction) {
-            if (is_file($possibleControllerFile)) {
-                $controllerName = substr($possibleControllerFile, strrpos($possibleControllerFile, '/') + 1, -strlen(CONTROLLERS_EXTENSION));
-                $actionName     = $possibleAction;
-                return $possibleControllerFile;
+        foreach ($possibleViewFiles as $possibleViewFile => $possibleAction) {
+            if (is_file($possibleViewFile)) {
+                $viewName   = substr($possibleViewFile, strrpos($possibleViewFile, '/') + 1, -strlen(VIEWS_EXTENSION));
+                $actionName = $possibleAction;
+                return $possibleViewFile;
             }
         }
 
-        //No controller found :s
-        return $controllerName = $actionName = null;
+        //No view found :s
+        return $viewName = $actionName = null;
 
     }
 

@@ -17,7 +17,7 @@
  class Index
  {
 
-    public function handle() {
+    public function render() {
         echo 'hello world!';
     }
 
