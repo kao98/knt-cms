@@ -1,0 +1,255 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"requested",
+				"requestedController"
+			],
+			[
+				"possible",
+				"possibleControllerFiles"
+			],
+			[
+				"controllers_",
+				"CONTROLLERS_INDEX"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "Vendor/Knt/Framework/Config/const.php",
+			"settings":
+			{
+				"buffer_size": 1546,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "Vendor/Knt/Framework/Framework.php",
+			"settings":
+			{
+				"buffer_size": 7340,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Aurelien/Documents/dev/knt_homeSearch_application.php",
+		"/C/Users/Aurelien/Documents/dev/functions.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/index.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Go.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Framework.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Core/Collection.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Core/ICollection.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Core/IRequest.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Core/Request.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Exception/KntFrameworkException.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/Vendor/Knt/Framework/Sample/Index.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/tests/units/Vendor/Knt/Framework/Core/Collection.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/phpinfo.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/knt-cms-st2-project.sublime-workspace",
+		"/C/Users/Aurelien/Documents/dev/stjx/list.phtml",
+		"/C/Users/Aurelien/Documents/dev/stjx/collections.phtml",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/knt-cms-st2-project.sublime-project",
+		"/C/Users/Aurelien/Downloads/LeCaliente.kml",
+		"/C/Users/Aurelien/Documents/dev/kntCMS/php/php.ini",
+		"/C/nginx/conf/nginx.conf",
+		"/C/Users/Aurelien/Documents/dev/totemsWar/www/index.html",
+		"/C/Program Files (x86)/Tiled/examples/isometric_grass_and_water.json",
+		"/C/Users/Aurelien/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/Aurelien/AppData/Roaming/Sublime Text 2/Packages/User/Distraction Free.sublime-settings",
+		"/C/Users/Aurelien/AppData/Roaming/Sublime Text 2/Packages/User/JSON.sublime-settings",
+		"/C/Users/Aurelien/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/E/TotemsWar/essais/www/world/theWold.tmx",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/tests/units/Vendor/Knt/Framework/Collection.php",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/tests/units/mageekguy.atoum.phar",
+		"/C/Users/Aurelien/Documents/dev/knt-cms/tests/Vendor/Knt/Framework/Collection.php",
+		"/C/Users/Aurelien/Documents/dev/totemsWar/www/xengine/xdisplay_engine.js",
+		"/C/Users/Aurelien/Documents/dev/totemsWar/www/xengine/xdisplay_object.js",
+		"/C/Program Files (x86)/Tiled/examples/isometric_grass_and_water.tmx"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"continue",
+			"ICollection",
+			"initialize",
+			");",
+			"initialize",
+			"Request",
+			"Framework",
+			"memory",
+			"extension_dir"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "Vendor/Knt/Framework/Config/const.php",
+					"settings":
+					{
+						"buffer_size": 1546,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								392,
+								392
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Vendor/Knt/Framework/Framework.php",
+					"settings":
+					{
+						"buffer_size": 7340,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2450,
+								2450
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 29.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 264.0,
+	"status_bar_visible": true
+}

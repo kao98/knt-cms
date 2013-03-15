@@ -11,11 +11,16 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
+require('Vendor/Knt/Framework/Framework.php');
+
+use \Knt\Framework\Framework;
+
+
 /**
- * index.php
+ * Go.php
  * Creation date: 27 nov. 2012
  * 
- * KNT Framework main entry-point.
+ * KNT Framework launcher (bootstrap).
  * 
  * Version 1.0: Initial version
  * 
@@ -23,7 +28,11 @@
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
+class Knt
+{
+    public static function Go() {
 
-require('Vendor/Knt/Framework/Go.php');
+        Framework::handleRequest();
 
-Knt::Go();
+    }
+}

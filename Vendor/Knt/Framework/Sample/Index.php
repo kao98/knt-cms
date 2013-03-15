@@ -11,19 +11,14 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-/**
- * index.php
- * Creation date: 27 nov. 2012
- * 
- * KNT Framework main entry-point.
- * 
- * Version 1.0: Initial version
- * 
- * @package Knt\Framework
- * @version 1.0
- * @author Aurélien Reeves (Kao ..98)
- */
+ /**
+  *
+  */
+ class Index
+ {
 
-require('Vendor/Knt/Framework/Go.php');
+    public function handle() {
+        echo 'hello world!';
+    }
 
-Knt::Go();
+ }
