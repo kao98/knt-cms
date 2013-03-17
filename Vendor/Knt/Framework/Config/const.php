@@ -39,7 +39,7 @@ DEFINED('VIEWS_INDEX')      OR DEFINE('VIEWS_INDEX',        'index');
 /**
  * The default view, typically "Index".
  */
-DEFINED('DEFAULT_VIEW')     OR DEFINE('DEFAULT_VIEW',       'Index');
+DEFINED('DEFAULT_VIEW')     OR DEFINE('DEFAULT_VIEW',       'Home');
 
 /**
  * Views extension

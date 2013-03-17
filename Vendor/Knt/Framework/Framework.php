@@ -42,7 +42,6 @@ class Framework
 {
 
     protected $request = null; //Request object
-    protected $action  = null; //The action to handle
 
     /**
      * Constructor. Initialize a new instance of the Framework with the given IRequest object.
@@ -67,7 +66,7 @@ class Framework
 
     /**
      * This static method will handle the given request. It will initialize a new
-     * instance of the Framework, find then execute the requested action.
+     * instance of the Framework, find then execute the requested method.
      *
      * @param IRequest $request The request to handle. Default null. If null, will initialize
      * a new default Request object.
@@ -91,13 +90,19 @@ class Framework
         $viewPath   = trim(BASE_PATH, '\\/') . '/' . trim(VIEWS_PATH, '\\/');
         $viewFile   = null;
         $class      = null;
-        $action     = null;
+        $method     = null;
 
-        $viewFile   = $this->_retrieveView($viewPath, $class, $action, $requestedView ?: $this->request->path);
+        $viewFile   = $this->_retrieveView($viewPath, $class, $method, $requestedView ?: $this->request->path);
 
         if ($viewFile !== null) {
             require($viewFile);
-            return new $class;
+
+            if (is_subclass_of((string)$class, 'Knt\Framework\Core\IView')) {
+                $view = new $class;
+                $view->setMethod($method)->setQuery($this->request->get);
+                return $view;
+            }
+
         }
 
         //TODO: return 404
@@ -107,18 +112,18 @@ class Framework
 
     /**
      * Retrieve the view file for the given requested path.
-     * The requested path basically include view path, name, then action to do.
-     * But it may also be only a view path and name (action will be the default one),
-     * or only a view path (view name and action name will be the default ones).
+     * The requested path basically include view path, name, then method to do.
+     * But it may also be only a view path and name (method will be the default one),
+     * or only a view path (view name and method name will be the default ones).
      *
      * @param string $viewPath The path where to look for views
      * @param &string &$viewName Will return the name of the desired view
-     * @param &string &$actionName Will return the name of the desired action
+     * @param &string &$methodName Will return the name of the desired method
      * @param string $requestedPath The requested path. 
      * If empty it will look for a default view (default '').
      * @return string The full path of the file containing the desired view
      */
-    protected function _retrieveView($viewPath, &$viewName, &$actionName, $requestedPath = '') {
+    protected function _retrieveView($viewPath, &$viewName, &$methodName, $requestedPath = '') {
 
         //The view path should be a valid directory.
         if (!is_dir($viewPath))
@@ -127,58 +132,58 @@ class Framework
         
         $requestedPath      = trim($requestedPath, '/');
 
-        //the requested action should be the last part of the requested path
-        $requestedAction    = trim(substr($requestedPath, strrpos($requestedPath, '/')), '/');
+        //the requested method should be the last part of the requested path
+        $requestedMethod    = trim(substr($requestedPath, strrpos($requestedPath, '/')), '/');
 
-        //We remove the requested action of the requested path
+        //We remove the requested method of the requested path
         $requestedPath      = substr($requestedPath, 0, strrpos($requestedPath, '/'));
 
-        //If we have a requested action but no requested path, the requested action is actually the requested path
-        if (strlen($requestedPath) == 0 && strlen($requestedAction) > 0) {
-            $requestedPath      = $requestedAction;
-            $requestedAction    = VIEWS_INDEX;
+        //If we have a requested method but no requested path, the requested method is actually the requested path
+        if (strlen($requestedPath) == 0 && strlen($requestedMethod) > 0) {
+            $requestedPath      = $requestedMethod;
+            $requestedMethod    = VIEWS_INDEX;
         }
 
         //If no requested path, we will look for the default view
         $requestedPath      = $requestedPath    ?: DEFAULT_VIEW;
 
-        //If no requested action,we will use the default action
-        $requestedAction    = $requestedAction  ?: VIEWS_INDEX;
+        //If no requested method,we will use the default method
+        $requestedMethod    = $requestedMethod  ?: VIEWS_INDEX;
 
 
         $possibleViewFiles = array(
             //The request is well formed
-            //Example: /View/action => View.php, Folder/View/action => Folder/View.php
+            //Example: /View/method => View.php, Folder/View/method => Folder/View.php
             $viewPath . '/' . $requestedPath . VIEWS_EXTENSION
-                => $requestedAction,
+                => $requestedMethod,
 
-            //The action is actually the view. Action will be the default one
-            //Example: /Folder/View => Folder/View.php (action => index)
-            $viewPath . '/' . $requestedPath . '/' . $requestedAction . VIEWS_EXTENSION
+            //The method is actually the view. Method will be the default one
+            //Example: /Folder/View => Folder/View.php (method => index)
+            $viewPath . '/' . $requestedPath . '/' . $requestedMethod . VIEWS_EXTENSION
                 => VIEWS_INDEX,
             
-            //The view is actually the folder which contains views. The requested view may be the default one. No action were requested
-            //Example: /Folder => Folder/Index.php (action => index)
+            //The view is actually the folder which contains views. The requested view may be the default one. No method were requested
+            //Example: /Folder => Folder/Index.php (method => index)
             $viewPath . '/' . $requestedPath . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
-                => $requestedAction,
+                => $requestedMethod,
             
-            //The requested action is actually the folder wich contains the views. The requested view may be the default one.
-            //Example: /Folder/View => /Folder/View/Index.php (action => index)
-            $viewPath . '/' . $requestedPath . '/' . $requestedAction . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
+            //The requested method is actually the folder wich contains the views. The requested view may be the default one.
+            //Example: /Folder/View => /Folder/View/Index.php (method => index)
+            $viewPath . '/' . $requestedPath . '/' . $requestedMethod . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
                 => VIEWS_INDEX
         );
 
         //The first found will be the good one. Other ones will be ignored.
-        foreach ($possibleViewFiles as $possibleViewFile => $possibleAction) {
+        foreach ($possibleViewFiles as $possibleViewFile => $possibleMethod) {
             if (is_file($possibleViewFile)) {
                 $viewName   = substr($possibleViewFile, strrpos($possibleViewFile, '/') + 1, -strlen(VIEWS_EXTENSION));
-                $actionName = $possibleAction;
+                $methodName = $possibleMethod;
                 return $possibleViewFile;
             }
         }
 
         //No view found :s
-        return $viewName = $actionName = null;
+        return $viewName = $methodName = null;
 
     }
 

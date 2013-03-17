@@ -16,11 +16,11 @@ namespace Knt\Framework\Core;
 require_once('ICollection.php');
 
 /**
- * Request.php
+ * IRequest.php
  * Creation date: 15 dec. 2012
  * 
- * KNT Request class.
- * Represent the GET from a http request.
+ * KNT IRequest interface.
+ * Represent a request.
  * 
  * Version 1.0: Initial version
  *

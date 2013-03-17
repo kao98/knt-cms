@@ -21,7 +21,7 @@ require_once('ICollection.php');
  * Creation date: 15 dec. 2012
  * 
  * KNT Request class.
- * Represent the GET from a http request.
+ * Represent a request to handle.
  * 
  * Version 1.0: Initial version
  *
@@ -32,7 +32,7 @@ require_once('ICollection.php');
 class Request implements IRequest
 {
     public    $path = null;     //Path to deserve
-    protected $get  = null;     //Get variables Collection
+    public    $get  = null;     //Get variables Collection
     protected $post = null;     //Posted data Collection
 
     /**
