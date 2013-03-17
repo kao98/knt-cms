@@ -87,7 +87,7 @@ class Framework
      */
     public function getView($requestedView = null) {
 
-        $viewPath   = trim(BASE_PATH, '\\/') . '/' . trim(VIEWS_PATH, '\\/');
+        $viewPath   = rtrim(BASE_PATH, '\\/') . '/' . trim(VIEWS_PATH, '\\/');
         $viewFile   = null;
         $class      = null;
         $method     = null;
