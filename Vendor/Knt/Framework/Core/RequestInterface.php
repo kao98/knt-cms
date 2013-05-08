@@ -26,6 +26,13 @@ namespace Knt\Framework\Core;
  */
 interface RequestInterface extends \Serializable
 {
+    
+    //We define some constants representing the available http methods
+    const   METHOD_GET     = 'get';
+    const   METHOD_POST    = 'post';
+    const   METHOD_PUT     = 'put';
+    const   METHOD_DELETE  = 'delete';
+    
     /**
      * Constructor. Initialize the Request with the given data.
      * Data may be null, then the Request will be initialized with

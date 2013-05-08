@@ -86,7 +86,7 @@ class Framework
         
         $instance   = self::getInstance($request); //->getView()->render();
         
-        if ($instance->getRequest()->getMethod() !== 'GET') {
+        if ($instance->getRequest()->getMethod() !== RequestInterface::METHOD_GET) {
             $instance->getComponent('Controller')->call();
             //TODO: retrieve the view from the controller just called then render it
         } else {

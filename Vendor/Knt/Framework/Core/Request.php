@@ -28,6 +28,13 @@ namespace Knt\Framework\Core;
  */
 class Request implements RequestInterface
 {
+    //The folowing array will help during verifying the validity of a method (see setMethod)
+    private static $_availableMethods = array(
+        self::METHOD_GET, 
+        self::METHOD_POST, 
+        self::METHOD_PUT, 
+        self::METHOD_DELETE);
+    
     protected $_queriedPath = null;     //Path to deserve
     protected $_queriedData = null;     //Get variables Collection
     protected $_postedData  = null;     //Posted data Collection
@@ -104,9 +111,14 @@ class Request implements RequestInterface
      */
     public function setMethod($method = null) {
         
-        $this->_method = $method ?: $this->_retrieveMethod();
-        return $this;
-                
+        $method = strtolower($method ?: $this->_retrieveMethod());
+        
+        if (in_array($method, self::$_availableMethods)) {
+            $this->_method = $method;
+            return $this;
+        }
+        
+        throw new \Knt\Framework\Exception\KntFrameworkException('Bad method specified');
     }
     
     /**
@@ -116,7 +128,7 @@ class Request implements RequestInterface
      */
     protected function _retrieveMethod() {
 
-        return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
+        return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'get';
 
     }
     
