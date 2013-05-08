@@ -14,26 +14,25 @@
 namespace Knt\Framework\Core;
 
 /**
- * ICollection.php
- * Creation date: 16 dec. 2012
+ * CollectionInterface.php
  * 
- * The ICollection interface provide the interface for Collection object.
+ * This interface provides the interface for Collection objects.
  * See the Collection corresponding base implementation (Collection.php) for more details.
  * Version 1.0: Initial version
  * 
- * @package Knt\Framework
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
-interface ICollection extends \IteratorAggregate, \Countable 
+interface CollectionInterface extends \IteratorAggregate, \Countable , \Serializable
 {
 
     /**
      * The constructor initialize the Collection with the given data
      *
      * @param array $data (default: empty array) The data used to initialize our collection
+     * @param bool $useReference (default: false) Pass true to use the $data array by reference instead of by value
      */
-    public function __construct(array $data = array());
+    public function __construct(array &$data = array(), $useReference = false);
 
     /**
      * Return the requested data identified by its index

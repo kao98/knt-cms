@@ -11,103 +11,43 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-require_once(BASE_PATH . '/Vendor/Knt/Framework/Core/IView.php');
-
-use Knt\Framework;
-use Knt\Framework\Core\IView;
-
-
-
- /**
-  *
-  */
- class View implements IView
- {
-
-    private $method = null;
-    private $query  = null;
-    
-    public function render($method = null) {
-
-        $methodToRender = $method ?: $this->getMethod() ?: VIEWS_INDEX;
-
-        if (method_exists($this, $methodToRender))
-            $this->_invoke($methodToRender);
-
-        else
-            throw new Framework\Exception\KntFrameworkException(sprintf("The method '%s' was not found in the view '%s'", $methodToRender, __CLASS__));
-
-        return $this;
+class Listener {
+    public static function add($controller, $originalRequest = null) {
+        $originalRequest = $originalRequest ?: Knt\Framework\Framework::getInstance()->getRequest();
+        
+        var_dump($originalRequest);
+        
+        return '/index.php' . $originalRequest->getQuery();
+        //var_dump(serialize($originalRequest), base64_encode(gzdeflate(serialize($originalRequest), 9)));
     }
+}
 
-    protected function _invoke($method) {
-
-        $reflection = new \ReflectionMethod($this, $method);
-
-        if ($reflection->isPublic() && !$reflection->isAbstract()) {
-            
-            $args = array();
-
-            $parameters = $reflection->getParameters();
-            foreach ($parameters as $parameter) {
-
-                if ($parameter->canBePassedByValue()) {
-                    $arg = $this->query->get($parameter->getName(), null);
-                    if ($arg === null && $parameter->isDefaultValueAvailable())
-                        $arg = $parameter->getDefaultValue();
-
-                    $args[] = $arg;
-                } else {
-                    throw new Framework\Exception\KntFrameworkException("{$parameter->getName()} cannot be passed by reference");
-                }
-
-
-            }
-
-            $reflection->invokeArgs($this, $args);
-
-        }
-
-    }
-
-    public function setMethod($method = null) {
-
-        $this->method = $method ?: VIEWS_INDEX;
-        return $this;
-
-    }
-
-    public function getMethod() {
-
-        return $this->method ?: VIEWS_INDEX;
-
-    }
-
-
-    public function setQuery($query) {
-
-        $this->query = $query;
-        return $this;
-
-    }
-
-    public function getQuery() {
-
-        return $this->query;
-
-    }
-
- }
-
- class Home extends View {
+ class Home extends Knt\Framework\Core\Component\View {
 
     public function index() {
         echo 'Hello Index!';
+        $session = new Knt\Framework\Core\Session();
+        $post = Knt\Framework\Framework::getInstance()->getRequest()->getPostedData();
+        if ($post->get('input') !== null) {
+            $session->start();
+            
+            var_dump($session->set('the_test', $post->get('input')));
+            
+        } else {
+            $session->start();
+            var_dump( $session);
+        }
+        
+        echo '
+        
+            <form method="POST" action="' . Listener::add('Controller/action') . '">
+                <input type="text" name="input" value="'.$session->get('the_test', '').'" />
+                <input type="submit" />
+            </form>';
     }
 
     public function test($arg1 = 'def', $arg2 = 'default') {
         echo "1:$arg1 2:$arg2";
     }
 
-
- }
+}

@@ -25,23 +25,40 @@ namespace Knt\Framework;
 DEFINED('BASE_PATH')        OR DEFINE('BASE_PATH',          __DIR__ . '/../../../..');
 
 /**
- * The path, relative to the BASE_PATH, where to find the views.
+ * The path to the framework
+ */
+DEFINED('FRAMEWORK_PATH')   OR DEFINE('FRAMEWORK_PATH',     __DIR__ . '/..');
+
+/**
+ * The path where to find the views.
  * By default, will be the folder of the sample project provided with the framework.
  * This constant is the only one that really need to be customized.
  */
-DEFINED('VIEWS_PATH')       OR DEFINE('VIEWS_PATH',         '/Vendor/Knt/Framework/Sample');
+DEFINED('VIEWS_PATH')       OR DEFINE('VIEWS_PATH',         BASE_PATH . '/Vendor/Knt/Framework/Sample');
 
 /**
- * The name of the default view, typically index
+ * The name of the default method to call, typically index
  */
 DEFINED('VIEWS_INDEX')      OR DEFINE('VIEWS_INDEX',        'index');
 
 /**
- * The default view, typically "Index".
+ * The default view, typically "Home" or "Index".
  */
 DEFINED('DEFAULT_VIEW')     OR DEFINE('DEFAULT_VIEW',       'Home');
 
 /**
- * Views extension
+ * Views file extension
  */
 DEFINED('VIEWS_EXTENSION')  OR DEFINE('VIEWS_EXTENSION',    '.php');
+
+/**
+ * The path where to find the controllers.
+ * By default, will be the folder of the sample project provided with the framework.
+ * This constant is the only one that really need to be customized.
+ */
+DEFINED('CONTROLLERS_PATH') OR DEFINE('CONTROLLERS_PATH',   BASE_PATH . '/Vendor/Knt/Framework/Sample');
+
+/**
+ * Controllers file extension
+ */
+DEFINED('CONTROLLERS_EXTENSION') OR DEFINE('CONTROLLERS_EXTENSION', '.php');

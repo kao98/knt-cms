@@ -19,10 +19,7 @@ require_once('Config/const.php');
 
 /* Ok, we can continue with the required files inclusion, the uses of the required namespaces, and everything */
 
-require_once('Core/IRequest.php');
-require_once('Exception/KntFrameworkException.php');
-
-use Knt\Framework\Core\IRequest;
+use Knt\Framework\Core\RequestInterface;
 
 /**
  * Framework.php
@@ -40,162 +37,178 @@ use Knt\Framework\Core\IRequest;
  */
 class Framework
 {
-
-    protected $request = null; //Request object
+    protected static    $_instance  = null; //Singleton instance
+    protected           $_request   = null; //Request object
 
     /**
-     * Constructor. Initialize a new instance of the Framework with the given IRequest object.
+     * Constructor. Initialize a new instance of the Framework with the given Request object.
      * 
-     * @param IRequest $request The request that will be handled by the framework. Default null.
+     * @param RequestInterface $request The request that will be handled by the framework. Default null.
      * If null, the handled request will be initialize with some default values.
      */
-    public function __construct(IRequest $request = null) {
+    private function __construct(RequestInterface $request = null) {
 
-        if ($request == null) {
-
-            require_once('Core/Request.php');
-            $this->request = new Core\Request();
-        
-        } else {
-        
-            $this->request = $request;
-        
-        }
+        $this->setRequest($request);
 
     }
 
+    /**
+     * static class: no clone.
+     */
+    private function __clone() { }
+        
+    /**
+     * Singleton implementation: return the Framework instance.
+     * Initialize / set the request of the Framework instance with the given request object.
+     * 
+     * @param RequestInterface $request (default null) A request wich will be passed to the Framework instance.
+     * If null, and no instance of a Framework exists, the instance will be initialized with a new default Request object.
+     * @return Framework the singleton instance 
+     */
+    public static function getInstance(RequestInterface $request = null) {
+        
+        if (self::$_instance !== null && $request !== null)
+            self::$_instance->setRequest($request);
+        
+        return self::$_instance ?: self::$_instance = new Framework($request);        
+        
+    }
+    
     /**
      * This static method will handle the given request. It will initialize a new
      * instance of the Framework, find then execute the requested method.
      *
-     * @param IRequest $request The request to handle. Default null. If null, will initialize
+     * @param RequestInterface $request The request to handle. Default null. If null, will initialize
      * a new default Request object.
      * @return Framework The instancied Framework instance.
      */
-    public static function handleRequest(IRequest $request = null) {
+    public static function handleRequest(RequestInterface $request = null) {
         
-        $instance = new Framework($request);
-
-        $instance->getView()->render();
-
-        return $instance;
-
+        $instance   = self::getInstance($request); //->getView()->render();
+        
+        if ($instance->getRequest()->getMethod() !== 'GET') {
+            $instance->getComponent('Controller')->call();
+            //TODO: retrieve the view from the controller just called then render it
+        } else {
+            $instance->getComponent('View')->render();
+        }
+        
     }
 
     /**
-     *
+     * Return the instance of the requested component.
+     * The component is initialized, ready to go.
+     * 
+     * @param string $componentType the type of the component ('View' or 'Controller')
+     * @param string $requestedComponent (default null) 
+     * the requested path that should lead to the component.
+     * If null, will try to use the queried path
+     * @return mixed the instance of the requested component.
+     * @exception todo
      */
-    public function getView($requestedView = null) {
+    public function getComponent($componentType, $requestedComponent = null) {
 
-        $viewPath   = rtrim(BASE_PATH, '\\/') . '/' . trim(VIEWS_PATH, '\\/');
-        $viewFile   = null;
         $class      = null;
         $method     = null;
-
-        $viewFile   = $this->_retrieveView($viewPath, $class, $method, $requestedView ?: $this->request->path);
-
-        if ($viewFile !== null) {
-            require($viewFile);
-
-            if (is_subclass_of((string)$class, 'Knt\Framework\Core\IView')) {
-                $view = new $class;
-                $view->setMethod($method)->setQuery($this->request->get);
-                return $view;
-            }
-
-        }
-
-        //TODO: return 404
-        return null;
-
-    }
-
-    /**
-     * Retrieve the view file for the given requested path.
-     * The requested path basically include view path, name, then method to do.
-     * But it may also be only a view path and name (method will be the default one),
-     * or only a view path (view name and method name will be the default ones).
-     *
-     * @param string $viewPath The path where to look for views
-     * @param &string &$viewName Will return the name of the desired view
-     * @param &string &$methodName Will return the name of the desired method
-     * @param string $requestedPath The requested path. 
-     * If empty it will look for a default view (default '').
-     * @return string The full path of the file containing the desired view
-     */
-    protected function _retrieveView($viewPath, &$viewName, &$methodName, $requestedPath = '') {
-
-        //The view path should be a valid directory.
-        if (!is_dir($viewPath))
-            throw new Exception\KntFrameworkException('Please review the framework configuration. The base views path seems to not exists');
-
+        $componentType = ucfirst(strtolower($componentType));
         
-        $requestedPath      = trim($requestedPath, '/');
-
-        //the requested method should be the last part of the requested path
-        $requestedMethod    = trim(substr($requestedPath, strrpos($requestedPath, '/')), '/');
-
-        //We remove the requested method of the requested path
-        $requestedPath      = substr($requestedPath, 0, strrpos($requestedPath, '/'));
-
-        //If we have a requested method but no requested path, the requested method is actually the requested path
-        if (strlen($requestedPath) == 0 && strlen($requestedMethod) > 0) {
-            $requestedPath      = $requestedMethod;
-            $requestedMethod    = VIEWS_INDEX;
+        switch ($componentType) {
+            case 'View':
+                $componentFile = Core\Component\Component::retrieve($requestedComponent ?: $this->queriedPath, VIEWS_PATH, $class, $method, VIEWS_EXTENSION, DEFAULT_VIEW, VIEWS_INDEX);
+                break;
+            case 'Controller':
+                $componentFile = Core\Component\Component::retrieve($requestedComponent ?: $this->queriedPath, CONTROLLERS_PATH, $class, $method, CONTROLLERS_EXTENSION);
+                break;
+            default:
+                throw new Exception\KntFrameworkException('Unrecognized component type');
         }
-
-        //If no requested path, we will look for the default view
-        $requestedPath      = $requestedPath    ?: DEFAULT_VIEW;
-
-        //If no requested method,we will use the default method
-        $requestedMethod    = $requestedMethod  ?: VIEWS_INDEX;
-
-
-        $possibleViewFiles = array(
-            //The request is well formed
-            //Example: /View/method => View.php, Folder/View/method => Folder/View.php
-            $viewPath . '/' . $requestedPath . VIEWS_EXTENSION
-                => $requestedMethod,
-
-            //The method is actually the view. Method will be the default one
-            //Example: /Folder/View => Folder/View.php (method => index)
-            $viewPath . '/' . $requestedPath . '/' . $requestedMethod . VIEWS_EXTENSION
-                => VIEWS_INDEX,
+        
+        if ($componentFile !== null) {
             
-            //The view is actually the folder which contains views. The requested view may be the default one. No method were requested
-            //Example: /Folder => Folder/Index.php (method => index)
-            $viewPath . '/' . $requestedPath . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
-                => $requestedMethod,
-            
-            //The requested method is actually the folder wich contains the views. The requested view may be the default one.
-            //Example: /Folder/View => /Folder/View/Index.php (method => index)
-            $viewPath . '/' . $requestedPath . '/' . $requestedMethod . '/' . DEFAULT_VIEW . VIEWS_EXTENSION
-                => VIEWS_INDEX
-        );
+            require_once($componentFile);
 
-        //The first found will be the good one. Other ones will be ignored.
-        foreach ($possibleViewFiles as $possibleViewFile => $possibleMethod) {
-            if (is_file($possibleViewFile)) {
-                $viewName   = substr($possibleViewFile, strrpos($possibleViewFile, '/') + 1, -strlen(VIEWS_EXTENSION));
-                $methodName = $possibleMethod;
-                return $possibleViewFile;
+            if (is_subclass_of("$class", 'Knt\Framework\Core\Component\\' . $componentType . 'Interface')) {
+                
+                $component = new $class;
+                $component->initialize($this, $method);
+                
+                return $component;
+                
+            } else {
+                throw new Exception\KntFrameworkException('Bad request.', 400);
             }
-        }
 
-        //No view found :s
-        return $viewName = $methodName = null;
+        } else {
+            throw new Exception\KntFrameworkException('Requested component not found.', 404);
+        }
 
     }
-
+    
     /**
      * Return the request object of the current Framework object
      *
-     * @return IRequest The request corresponding to the current Framework instance
+     * @return RequestInterface The request corresponding to the current Framework instance
      */
     public function getRequest() {
         
-        return $this->request;
+        return $this->_request;
     
     }
 
+    /**
+     * Set the request for the current Framework instance
+     * 
+     * @param RequestInterface $request (default null) the request object. If null, will initialize a default request. 
+     */
+    public function setRequest(RequestInterface $request = null) {
+        
+        if ($request == null) {
+
+            $this->_request = new Core\Request();
+        
+        } else {
+        
+            $this->_request = $request;
+        
+        }
+        
+        return $this;
+        
+    }
+    
+    /**
+     * The magic __get method allow to ask for some properties in usual names
+     * like the GET and POST data which are stored in the Request object.
+     * 
+     * @param string $variableName the name of the desired property
+     * @return mixed the requested property 
+     */
+    public function __get($variableName) {
+        
+        switch ($variableName) {
+            case 'queriedData':
+            case 'query':
+            case 'get':
+                return $this->getRequest()->getQueriedData();
+                break;
+            
+            case 'postedData':
+            case 'data':
+            case 'post':
+                return $this->getRequest()->getPostedData();
+                break;
+            
+            case 'queriedPath':
+            case 'path':
+                return $this->getRequest()->getQueriedPath();
+                break;
+    
+            case 'request':
+                return $this->getRequest();
+                break;
+            
+        }
+        
+    }
+    
 }

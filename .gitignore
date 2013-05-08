@@ -1,0 +1,12 @@
+/tests/units/reports/models/coverage/
+/tests/units/reports/models/treemap/
+/tests/units/reports/models/configurations/
+/tests/units/reports/models/vim/
+/tests/units/reports/models/images/
+/tests/units/reports/models/templates/
+/tests/units/reports/models/sonar/
+/tests/units/reports/models/phing/
+/tests/units/reports/coverage/treemap/
+/tests/units/reports/coverage/html/
+/tests/units/reports/models/
+/php-S.cmd

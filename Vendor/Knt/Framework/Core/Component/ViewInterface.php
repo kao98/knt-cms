@@ -11,13 +11,14 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-namespace Knt\Framework\Core;
+namespace Knt\Framework\Core\Component;
+use Knt\Framework\Core\CollectionInterface;
 
 /**
- * IView.php
+ * ViewInterface.php
  * Creation date: 16 mar. 2013
  * 
- * KNT IView interface.
+ * KNT View interface.
  * Base interface for the views managed by the framework.
  * 
  * Version 1.0: Initial version
@@ -26,7 +27,7 @@ namespace Knt\Framework\Core;
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
-interface IView
+interface ViewInterface extends ComponentInterface
 {
 
     /**
@@ -35,4 +36,8 @@ interface IView
      */
     public function render($method = null);
 
+    public function setQueriedData(CollectionInterface $data);
+
+    public function getQueriedData();
+    
 }

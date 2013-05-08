@@ -53,9 +53,33 @@ class Collection extends atoum\test
      * It should initialize the collection with the given data.
      */
     public function testConstructor_WithParameters_InitializeTheCollection() {
-        $col = new Core\Collection(array(0, 1));
+        $arr = array(0, 1);
+        $col = new Core\Collection($arr);
         $this->object($col)->hasSize(2);
+    }
 
+    /**
+     * Test that the collection don't alter the initial array
+     * if we didn't ask to use a reference
+     */
+    public function testConstructor_ByValue() {
+        $arr = array(0, 1);
+        $col = new Core\Collection($arr);
+        $col->set(0, 2);
+        $this->integer($col->get(0))->isEqualTo(2)
+             ->integer($arr[0])->isEqualTo(0);
+    }
+
+    /**
+     * Test that the collection alter the initial array
+     * if we ask to use a reference
+     */
+    public function testConstructor_ByReference() {
+        $arr = array(0, 1);
+        $col = new Core\Collection($arr, true);
+        $col->set(0, 2);
+        $this->integer($col->get(0))->isEqualTo(2)
+             ->integer($arr[0])->isEqualTo(2);
     }
 
     /**
@@ -73,7 +97,8 @@ class Collection extends atoum\test
      * To test the implementation of the Countable interface
      */
     public function testCount() {
-        $col = new Core\Collection(array(0, 1, 2, 3));
+        $array = array(0, 1, 2, 3);
+        $col = new Core\Collection($array);
         $this->integer(count($col))->isEqualTo(4);
     }
 
@@ -89,7 +114,8 @@ class Collection extends atoum\test
         $this->integer($col->add('test 0'))->isEqualTo(0);
         
         //Test: Add on a mixed collection
-        $col = new Core\Collection(array(5 => 0, 10 => 1, 'a' => 2));
+        $array = array(5 => 0, 10 => 1, 'a' => 2);
+        $col = new Core\Collection($array);
         
         $this->integer($col->add('test 1'))->isEqualTo(11);
         $this->integer($col->add('test 2'))->isEqualTo(12);
@@ -100,7 +126,8 @@ class Collection extends atoum\test
      * Test of the method Set that set a value in the collection
      */
     public function testSet() {
-        $col = new Core\Collection(array(0 => 0, "1" => "1"));
+        $array = array(0 => 0, "1" => "1");
+        $col = new Core\Collection($array);
         $this->integer($col->set(0, 10)->get(0))->isEqualTo(10);
         $this->string($col->set("1", "test")->get("1"))->isEqualTo("test");
         $this->string($col->set("new index", "new test")->get("new index"))->isEqualTo("new test");
@@ -110,7 +137,8 @@ class Collection extends atoum\test
      * Test of the method Get
      */
     public function testGet() {
-        $col = new Core\Collection(array(0 => 0, "1" => "1"));
+        $array = array(0 => 0, "1" => "1");
+        $col = new Core\Collection($array);
         $this->integer($col->get(0))->isEqualTo(0);
         $this->string($col->get("1"))->isEqualTo("1");
         $this->variable($col->get(2, 2))->isEqualTo(2);
@@ -133,6 +161,22 @@ class Collection extends atoum\test
         $this->variable($col->get('0[1]', 0))->isEqualTo(0);
 
         $this->variable($col->get('0[0][1][1]'))->isNull();
+
+    }
+
+    /**
+     * Test the serialization of the Collection
+     */
+    public function testSerialization() {
+        $arr = array(0, "Un", 'a' => array(2));
+        $initialCol = new Core\Collection($arr);
+        $resultCol = new Core\Collection();
+        $resultCol->unserialize($initialCol->serialize());
+
+        $this->integer(count($resultCol))->isEqualTo(3)
+             ->integer($resultCol->get(0))->isEqualTo($initialCol->get(0))
+             ->string($resultCol->get(1))->isEqualTo($initialCol->get(1))
+             ->array($resultCol->get('a'))->isEqualTo($initialCol->get('a'));
 
     }
 

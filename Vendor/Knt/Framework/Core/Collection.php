@@ -13,11 +13,8 @@
 
 namespace Knt\Framework\Core;
 
-require_once('ICollection.php');
-
 /**
  * Collection.php
- * Creation date: 28 nov. 2012
  * 
  * The Collection class aims to be a kind of array object.
  * I must confess that this class has been inspired by the
@@ -25,11 +22,10 @@ require_once('ICollection.php');
  *
  * Version 1.0: Initial version
  * 
- * @package Knt\Framework
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
-class Collection implements ICollection
+class Collection implements CollectionInterface
 {
     
     /**
@@ -37,15 +33,21 @@ class Collection implements ICollection
      *
      * @var array
      */
-    protected $dataContainer;
+    protected $_dataContainer;
 
     /**
      * The constructor initialize the Collection with the given data
      *
-     * @param array $data (default: empty array) The data used to initialize our collection
+     * @param array &$data (default: empty array) The data used to initialize our collection
+     * @param bool $useReference (default: false) Pass true to use the $data array by reference instead of by value
      */
-    public function __construct(array $data = array()) {
-        $this->dataContainer = $data;
+    public function __construct(array &$data = array(), $useReference = false) {
+        
+        if ($useReference) {
+            $this->_dataContainer = &$data;
+        } else {
+            $this->_dataContainer = $data;
+        }
     }
 
     /**
@@ -55,7 +57,7 @@ class Collection implements ICollection
      * @return int The number of items in the colleciton
      */
     public function count() {
-        return count($this->dataContainer);
+        return count($this->_dataContainer);
     }
 
     /**
@@ -65,7 +67,7 @@ class Collection implements ICollection
      * @return \ArrayIterator An \ArrayIterator instance on the collection
      */
     public function getIterator() {
-        return new \ArrayIterator($this->dataContainer);
+        return new \ArrayIterator($this->_dataContainer);
     }
 
     /**
@@ -76,7 +78,7 @@ class Collection implements ICollection
      * @return mixed The data located at $index. $default if the desired data doesn't exist.
      */
     public function get($index, $default = null) {
-        return $this->_deepSearch($this->dataContainer, $index, $default);
+        return $this->_deepSearch($this->_dataContainer, $index, $default);
     }
 
     /**
@@ -140,7 +142,7 @@ class Collection implements ICollection
      * @return Collection the current Collection 
      */
     public function set($key, $value = null) {
-        $this->dataContainer[$key] = $value;
+        $this->_dataContainer[$key] = $value;
         return $this;
     }
 
@@ -153,12 +155,28 @@ class Collection implements ICollection
      */
     public function add($value) {
         
-        $this->dataContainer[] = $value;
-        end($this->dataContainer);
-        $key = key($this->dataContainer);
-        reset($this->dataContainer);
+        $this->_dataContainer[] = $value;
+        end($this->_dataContainer);
+        $key = key($this->_dataContainer);
+        reset($this->_dataContainer);
 
         return $key;
     }
 
+    /**
+     * Serializable implementation: serialize the Collection class
+     * @return string the serialized reprensentation of the Collection class 
+     */
+    public function serialize() {
+        return serialize($this->_dataContainer);
+    }
+    
+    /**
+     * Serializable implementation: unserialize the Request class
+     * @param string $data the data that represent the serialized Request class 
+     */
+    public function unserialize($data) {
+        $this->_dataContainer = unserialize($data);
+    }
+        
 }

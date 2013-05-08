@@ -15,7 +15,6 @@ namespace Knt\Framework\Exception;
 
 /**
  * KntFrameworkException.php
- * Creation date: 07 feb. 2013
  * 
  * KNT Framework Exception class.
  * Exception thrown by the framework itself. 
@@ -23,11 +22,15 @@ namespace Knt\Framework\Exception;
  * 
  * Version 1.0: Initial version
  *
- * @package Knt\Framework\Exception
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
 class KntFrameworkException extends \Exception
 {
-
+    public function __construct($message, $code = 500, $previous = null) {
+        
+        parent::__construct($message, $code, $previous);
+        header("HTTP/1.0 $code");
+        
+    }    
 }
