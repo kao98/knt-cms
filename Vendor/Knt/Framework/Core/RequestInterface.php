@@ -38,11 +38,18 @@ interface RequestInterface extends \Serializable
      * Data may be null, then the Request will be initialized with
      * default data.
      * 
-     * @param string $path The information regarding path detail of the request (as something like $_SERVER['PATH_INFO']))
-     * @param CollectionInterface $get A Collection containing the get part of the request (as something like $_GET)
-     * @param CollectionInterface $post A Collection containing the post part of the request (as something like $_POST)
+     * @param string $path 
+     * The information regarding path detail of the request (as something like $_SERVER['PATH_INFO']))
+     * @param CollectionInterface $get
+     * A Collection containing the get part of the request (as something like $_GET)
+     * @param CollectionInterface $post 
+     * A Collection containing the post part of the request (as something like $_POST)
      */
-    public function __construct($queriedPath = null, $method = null, CollectionInterface $queriedData = null, CollectionInterface $postedData = null);
+    public function __construct(
+            $queriedPath                        = null, 
+            $method                             = null, 
+            CollectionInterface $queriedData    = null, 
+            CollectionInterface $postedData     = null);
 
     /**
      * Return the queried path 

@@ -30,6 +30,11 @@ DEFINED('BASE_PATH')        OR DEFINE('BASE_PATH',          __DIR__ . '/../../..
 DEFINED('FRAMEWORK_PATH')   OR DEFINE('FRAMEWORK_PATH',     __DIR__ . '/..');
 
 /**
+ * Base namespace of the project
+ */
+DEFINED('PROJECT_NAMESPACE') OR DEFINE('PROJECT_NAMESPACE', '\Knt\Framework\Sample\\');
+
+/**
  * The path where to find the views.
  * By default, will be the folder of the sample project provided with the framework.
  * This constant is the only one that really need to be customized.
@@ -62,3 +67,8 @@ DEFINED('CONTROLLERS_PATH') OR DEFINE('CONTROLLERS_PATH',   BASE_PATH . '/Vendor
  * Controllers file extension
  */
 DEFINED('CONTROLLERS_EXTENSION') OR DEFINE('CONTROLLERS_EXTENSION', '.php');
+
+/**
+ * Debug level
+ */
+DEFINED('DEBUG_LEVEL')      OR DEFINE('DEBUG_LEVEL',        1);

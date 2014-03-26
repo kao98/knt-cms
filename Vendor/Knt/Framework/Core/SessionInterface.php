@@ -71,12 +71,4 @@ interface SessionInterface
      */
     public function set($key, $value = null);
     
-    /**
-     * Add the value to the session
-     * then return the key of the value
-     *
-     * @param $value The value to add
-     * @return int The key of the newly added value
-     */
-    public function add($value);
 }

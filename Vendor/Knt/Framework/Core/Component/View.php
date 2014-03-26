@@ -12,8 +12,8 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use Knt\Framework\Framework;
-use Knt\Framework\Core\CollectionInterface;
+use \Knt\Framework\Framework;
+use \Knt\Framework\Core\CollectionInterface;
 
 /**
  * View.php
@@ -28,20 +28,24 @@ use Knt\Framework\Core\CollectionInterface;
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
- class View extends Component implements ViewInterface
- {
+class View extends Component implements ViewInterface
+{
     
-    /**
-     * Initialize the View.
+     /**
+     * Constructor. Initialize the View.
      * 
      * @param Framework\Framework $frameworkInstance an instance ofthe framework
      * @param string $method (default null) the name of the method to call to render the View.
      * If null the View will be initialized with the VIEWS_INDEX method.
      * @return View the current View instance 
      */
-    public function initialize(Framework $frameworkInstance, $method = null, CollectionInterface $queriedData = null) {
+    public function __construct(Framework $frameworkInstance, $method = null, CollectionInterface $queriedData = null) {
         
-        parent::initialize($frameworkInstance, $method ?: VIEWS_INDEX, $queriedData ?: $frameworkInstance->getRequest()->getQueriedData());
+        parent::__construct(
+                $frameworkInstance, 
+                $method ?: VIEWS_INDEX, 
+                $queriedData ?: $frameworkInstance->getRequest()->getQueriedData()
+                );
         
     }
     

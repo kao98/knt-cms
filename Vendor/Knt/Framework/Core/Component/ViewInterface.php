@@ -12,7 +12,7 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use Knt\Framework\Core\CollectionInterface;
+use \Knt\Framework\Core\CollectionInterface;
 
 /**
  * ViewInterface.php

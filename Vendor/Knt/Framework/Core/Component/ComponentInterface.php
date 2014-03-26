@@ -12,8 +12,8 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use Knt\Framework\Framework;
-use Knt\Framework\Core\CollectionInterface;
+use \Knt\Framework\Framework;
+use \Knt\Framework\Core\CollectionInterface;
 
 /**
  * ComponentInterface.php
@@ -28,11 +28,11 @@ use Knt\Framework\Core\CollectionInterface;
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
- interface ComponentInterface
- {
-
+interface ComponentInterface
+{
+     
     /**
-     * Initialize the Component.
+     * Constructor. Initialize the component.
      * 
      * @param Framework\Framework $frameworkInstance an instance ofthe framework
      * @param string $method the name of the method of the component to call
@@ -40,7 +40,7 @@ use Knt\Framework\Core\CollectionInterface;
      * Those data will be bind to the method arguments
      * @return Component the current Component instance 
      */
-    public function initialize(Framework $frameworkInstance, $method, CollectionInterface $data);
+    public function __construct(Framework $frameworkInstance, $method, CollectionInterface $data);
 
     /**
      * Invoke the specified method of the current component.

@@ -11,23 +11,25 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
+namespace Knt\Framework\Sample;
+
 class Listener {
     public static function add($controller, $originalRequest = null) {
-        $originalRequest = $originalRequest ?: Knt\Framework\Framework::getInstance()->getRequest();
+        $originalRequest = $originalRequest ?: \Knt\Framework\Framework::getInstance()->getRequest();
         
         var_dump($originalRequest);
         
         return '/index.php' . $originalRequest->getQuery();
-        //var_dump(serialize($originalRequest), base64_encode(gzdeflate(serialize($originalRequest), 9)));
     }
 }
 
- class Home extends Knt\Framework\Core\Component\View {
+class Home extends \Knt\Framework\Core\Component\View {
 
     public function index() {
+        
         echo 'Hello Index!';
-        $session = new Knt\Framework\Core\Session();
-        $post = Knt\Framework\Framework::getInstance()->getRequest()->getPostedData();
+        $session = new \Knt\Framework\Core\Session();
+        $post = \Knt\Framework\Framework::getInstance()->getRequest()->getPostedData();
         if ($post->get('input') !== null) {
             $session->start();
             
@@ -39,7 +41,7 @@ class Listener {
         }
         
         echo '
-        
+            <a href="index.php/Sample_1/">Sample #1</a>
             <form method="POST" action="' . Listener::add('Controller/action') . '">
                 <input type="text" name="input" value="'.$session->get('the_test', '').'" />
                 <input type="submit" />
@@ -50,4 +52,20 @@ class Listener {
         echo "1:$arg1 2:$arg2";
     }
 
+    
+    public function referencedParameter(&$arg) {
+        //for unit tests
+        return $arg = true;
+    }
+    
+    private function privateMethod() {
+        //For some unit tests
+        return true;
+    }
+    
+    protected function protectedMethod() {
+        //For some unit tests
+        return true;
+    }
+    
 }

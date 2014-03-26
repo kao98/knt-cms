@@ -18,7 +18,8 @@ namespace Knt\Framework\Core;
  * 
  * The Collection class aims to be a kind of array object.
  * I must confess that this class has been inspired by the
- * Fabien Potentier's ParameterBag class (https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpFoundation/ParameterBag.php).
+ * Fabien Potentier's ParameterBag class 
+ * (https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpFoundation/ParameterBag.php).
  *
  * Version 1.0: Initial version
  * 
@@ -118,7 +119,8 @@ class Collection implements CollectionInterface
             if ($arrayIndex !== null && isset($array[$arrayIndex]) && is_array($array[$arrayIndex])) {
 
                 //Building of a new index string without the first level
-                $newIndex = trim(substr($index, $posStart + 1, $posEnd - $posStart - 1), "'\"") . substr($index, $posEnd + 1);
+                $newIndex = trim(substr($index, $posStart + 1, $posEnd - $posStart - 1), "'\"")
+                            . substr($index, $posEnd + 1);
 
                 $array = $array[$arrayIndex];
                 $index = $newIndex;

@@ -11,19 +11,13 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
+namespace Knt\Framework\Sample\Sample_1;
+
 /**
- * index.php
- * Creation date: 27 nov. 2012
- * 
- * KNT Framework main entry-point.
- * 
- * Version 1.0: Initial version
- * 
- * @package Knt\Framework
- * @version 1.0
- * @author AurÃ©lien Reeves (Kao ..98)
+ * Description of Home
+ *
+ * @author Aurelien
  */
+class BaseView extends \Knt\Framework\Core\Component\View {
 
-require('Vendor/Knt/Framework/Go.php');
-
-Knt::Go();
+}

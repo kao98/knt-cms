@@ -45,11 +45,18 @@ class Request implements RequestInterface
      * Data may be null, then the Request will be initialized with
      * default data from global vars.
      * 
-     * @param string $queriedPath The information regarding path detail of the request (default will use $_SERVER['PATH_INFO']))
-     * @param CollectionInterface $queriedData A Collection containing the get part of the request (default will use $_GET)
-     * @param CollectionInterface $postedData A Collection containing the post part of the request (default will use $_POST)
+     * @param string $queriedPath 
+     * The information regarding path detail of the request (default will use $_SERVER['PATH_INFO']))
+     * @param CollectionInterface $queriedData 
+     * A Collection containing the get part of the request (default will use $_GET)
+     * @param CollectionInterface $postedData 
+     * A Collection containing the post part of the request (default will use $_POST)
      */
-    public function __construct($queriedPath = null, $method = null, CollectionInterface $queriedData = null, CollectionInterface $postedData = null) {
+    public function __construct(
+            $queriedPath                        = null, 
+            $method                             = null, 
+            CollectionInterface $queriedData    = null, 
+            CollectionInterface $postedData     = null) {
 
         $this
             ->setQueriedPath($queriedPath)

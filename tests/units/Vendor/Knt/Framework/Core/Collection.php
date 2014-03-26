@@ -12,15 +12,9 @@
  */
 
 
-namespace Knt\Framework\Core\Tests\Units;
+namespace Knt\Framework\Tests\Units\Core;
 
-
-DEFINED('BASE_PATH') OR DEFINE('BASE_PATH', __DIR__ . '/../../../../../../');
-
-
-require_once(BASE_PATH . 'tests/units/mageekguy.atoum.phar');
 use \mageekguy\atoum;
-
 
  /**
  * Tests for the Collection class.
@@ -29,12 +23,10 @@ use \mageekguy\atoum;
  * @lastUpdate 2012-11-28
  */
 
-include(BASE_PATH . 'Vendor/Knt/Framework/Core/Collection.php');
 use \Knt\Framework\Core;
 
 class Collection extends atoum\test
 {
-    private $col;
 
     // ... not sure the following tests are relevant               ... //
     // ... tests of the constructor and interfaces implementations ... //
@@ -173,10 +165,7 @@ class Collection extends atoum\test
         $resultCol = new Core\Collection();
         $resultCol->unserialize($initialCol->serialize());
 
-        $this->integer(count($resultCol))->isEqualTo(3)
-             ->integer($resultCol->get(0))->isEqualTo($initialCol->get(0))
-             ->string($resultCol->get(1))->isEqualTo($initialCol->get(1))
-             ->array($resultCol->get('a'))->isEqualTo($initialCol->get('a'));
+        $this->object($resultCol)->isEqualTo($initialCol);
 
     }
 

@@ -12,7 +12,8 @@
  */
 
 namespace Knt\Framework\Core;
-use Knt\Framework\Core\Collection;
+use \Knt\Framework\Core\Collection;
+use \Knt\Framework\Exception;
 
 /**
  * Session.php
@@ -39,18 +40,20 @@ class Session
      */
     public function __construct($name = null, $autoStart = true) {                
         $this->_autoStart = $autoStart;
-        if ($name !== null) $this->setName($name);
+        if ($name !== null) {
+            $this->setName($name);
+        }
     }
     
     /**
      * Use to start the session manager
      */
     public function start() {
-        if ($this->_started) return $this;
+        if ($this->_started) {
+            return $this;
+        }
         
         session_start();
-        
-        $_SESSION['test'] = 'test';
         
         $this->_collection = new Collection($_SESSION, true);
         
@@ -79,14 +82,20 @@ class Session
     /**
      * Return the requested data stored in the session identified by its index
      *
-     * @param string $index The index of the desired data
+     * @param string $key The index of the desired data
      * @param mixed $default (default null) The default value if $index is not found.
      * @return mixed The data located at $index. $default if the desired data doesn't exist.
      */
-    public function get($index, $default = null) {
-        if ($this->_autoStart) $this->start();
+    public function get($key, $default = null) {
+        if ($this->_autoStart) {
+            $this->start();
+        }
         
-        return $this->_collection->get($index, $default);
+        if (!$this->_started) {
+            throw new Exception\KntFrameworkException('Session not started yet.');
+        }
+        
+        return $this->_collection->get($key, $default);
     }
     
     /**
@@ -98,23 +107,21 @@ class Session
      * @return Collection the current Collection 
      */
     public function set($key, $value = null) {
-        if ($this->_autoStart) $this->start();
+        if ($this->_autoStart) {
+            $this->start();
+        }
+        
+        if (!$this->_started) {
+            throw new Exception\KntFrameworkException('Session not started yet.');
+        }
+        
+        if (!is_string($key)) {
+            throw new Exception\KntFrameworkException('The key must be a string.');
+        }
         
         $this->_collection->set($key, $value);
         
         return $this;
     }
 
-    /**
-     * Add the value to the session
-     * then return the key of the value
-     *
-     * @param $value The value to add
-     * @return int The key of the newly added value
-     */
-    public function add($value) {
-        if ($this->_autoStart) $this->start();
-        
-        return $this->_collection->add($value);
-    }
 }

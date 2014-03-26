@@ -12,8 +12,8 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use Knt\Framework\Framework;
-use Knt\Framework\Core\CollectionInterface;
+use \Knt\Framework\Framework;
+use \Knt\Framework\Core\CollectionInterface;
 
 interface ControllerInterface extends ComponentInterface
 {
@@ -31,19 +31,23 @@ interface ControllerInterface extends ComponentInterface
  * @version 1.0
  * @author Aurélien Reeves (Kao ..98)
  */
- class Controller extends Component implements ControllerInterface
- {
+class Controller extends Component implements ControllerInterface
+{
     
-    /**
-     * Initialize the Controller.
+     /**
+     * Constructor. Initialize the Controller.
      * 
      * @param Framework\Framework $frameworkInstance an instance of the framework
      * @param string $action the action of the controller to call.
      * @return Controller the current Controller instance 
      */
-    public function initialize(Framework $frameworkInstance, $action, CollectionInterface $postedData = null) {
+    public function __construct(Framework $frameworkInstance, $action, CollectionInterface $postedData = null) {
         
-        parent::initialize($frameworkInstance, $action, $postedData ?: $frameworkInstance->getRequest()->getPostedData());
+        parent::__construct(
+                $frameworkInstance, 
+                $action, 
+                $postedData ?: $frameworkInstance->getRequest()->getPostedData()
+                );
         
     }
     

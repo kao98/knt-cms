@@ -15,11 +15,11 @@ namespace Knt\Framework;
 
 /* Configuration uses constants defined in Config/const.php */
 
-require_once('Config/const.php');
+require_once 'Config/const.php';
 
 /* Ok, we can continue with the required files inclusion, the uses of the required namespaces, and everything */
 
-use Knt\Framework\Core\RequestInterface;
+use \Knt\Framework\Core\RequestInterface;
 
 /**
  * Framework.php
@@ -62,13 +62,15 @@ class Framework
      * Initialize / set the request of the Framework instance with the given request object.
      * 
      * @param RequestInterface $request (default null) A request wich will be passed to the Framework instance.
-     * If null, and no instance of a Framework exists, the instance will be initialized with a new default Request object.
+     * If null, and no instance of a Framework exists, 
+     * the instance will be initialized with a new default Request object.
      * @return Framework the singleton instance 
      */
     public static function getInstance(RequestInterface $request = null) {
         
-        if (self::$_instance !== null && $request !== null)
+        if (self::$_instance !== null && $request !== null) {
             self::$_instance->setRequest($request);
+        }
         
         return self::$_instance ?: self::$_instance = new Framework($request);        
         
@@ -84,13 +86,22 @@ class Framework
      */
     public static function handleRequest(RequestInterface $request = null) {
         
-        $instance   = self::getInstance($request); //->getView()->render();
+        if (DEBUG_LEVEL > 0) {
+            $startingTime = microtime(true); //TODO: refactor that
+        }
+        
+        $instance   = self::getInstance($request);
         
         if ($instance->getRequest()->getMethod() !== RequestInterface::METHOD_GET) {
             $instance->getComponent('Controller')->call();
             //TODO: retrieve the view from the controller just called then render it
         } else {
             $instance->getComponent('View')->render();
+        }
+        
+        if (DEBUG_LEVEL > 0) {
+            echo '<br /><pre>' . round((microtime(true) - $startingTime) * 1000, 3) . 'ms</pre>';
+            //TODO: refactor that
         }
         
     }
@@ -114,10 +125,26 @@ class Framework
         
         switch ($componentType) {
             case 'View':
-                $componentFile = Core\Component\Component::retrieve($requestedComponent ?: $this->queriedPath, VIEWS_PATH, $class, $method, VIEWS_EXTENSION, DEFAULT_VIEW, VIEWS_INDEX);
+                $componentFile = 
+                    Core\Component\Component::retrieve(
+                            $requestedComponent ?: $this->queriedPath, 
+                            VIEWS_PATH, 
+                            $class, 
+                            $method, 
+                            VIEWS_EXTENSION, 
+                            DEFAULT_VIEW, 
+                            VIEWS_INDEX
+                            );
                 break;
             case 'Controller':
-                $componentFile = Core\Component\Component::retrieve($requestedComponent ?: $this->queriedPath, CONTROLLERS_PATH, $class, $method, CONTROLLERS_EXTENSION);
+                $componentFile = 
+                    Core\Component\Component::retrieve(
+                            $requestedComponent ?: $this->queriedPath, 
+                            CONTROLLERS_PATH, 
+                            $class, 
+                            $method, 
+                            CONTROLLERS_EXTENSION
+                            );
                 break;
             default:
                 throw new Exception\KntFrameworkException('Unrecognized component type');
@@ -125,12 +152,11 @@ class Framework
         
         if ($componentFile !== null) {
             
-            require_once($componentFile);
-
+            include_once $componentFile;
+            $class = PROJECT_NAMESPACE . $class;
             if (is_subclass_of("$class", 'Knt\Framework\Core\Component\\' . $componentType . 'Interface')) {
                 
-                $component = new $class;
-                $component->initialize($this, $method);
+                $component = new $class($this, $method);
                 
                 return $component;
                 
@@ -190,22 +216,18 @@ class Framework
             case 'query':
             case 'get':
                 return $this->getRequest()->getQueriedData();
-                break;
             
             case 'postedData':
             case 'data':
             case 'post':
                 return $this->getRequest()->getPostedData();
-                break;
             
             case 'queriedPath':
             case 'path':
                 return $this->getRequest()->getQueriedPath();
-                break;
     
             case 'request':
                 return $this->getRequest();
-                break;
             
         }
         
