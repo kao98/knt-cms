@@ -153,7 +153,7 @@ class Framework
         if ($componentFile !== null) {
             
             include_once $componentFile;
-            $class = PROJECT_NAMESPACE . $class;
+            $class = $this->getProjectNamespace() . $class;
             if (is_subclass_of("$class", 'Knt\Framework\Core\Component\\' . $componentType . 'Interface')) {
                 
                 $component = new $class($this, $method);
@@ -168,6 +168,10 @@ class Framework
             throw new Exception\KntFrameworkException('Requested component not found.', 404);
         }
 
+    }
+    
+    protected function getProjectNamespace() {
+        return sprintf("\\%s\\", trim(PROJECT_NAMESPACE, '\\/'));
     }
     
     /**

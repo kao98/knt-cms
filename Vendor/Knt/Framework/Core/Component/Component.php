@@ -74,8 +74,7 @@ class Component implements ComponentInterface
             $defaultComponent   = null, 
             $defaultMethod      = null) {
 
-        $path = self::_prepareComponentPath($path);
-        
+        $path   = self::_prepareComponentPath($path);
         $method = '';
         self::_prepareRequestAndMethod($request, $method, $defaultComponent, $defaultMethod);
 
@@ -88,18 +87,21 @@ class Component implements ComponentInterface
                 $defaultComponent);
 
         //The first found will be the good one. Other ones will be ignored.
-        foreach ($possibleComponentFiles as $possibleComponentFile => $possibleMethod) {
+        foreach ($possibleComponentFiles as $possibleComponentFile => $possibleMethodName) {
+            
             if (is_file($possibleComponentFile)) {
                 
-                $componentName  = substr(
-                        $possibleComponentFile, strrpos($possibleComponentFile, '/') + 1,
-                        -strlen($componentExtension)
-                        );
-                
-                $methodName     = $possibleMethod;
+                //Following try to extract the class name, including the namespace, from the retrieved component
+                $componentName = substr($possibleComponentFile, strlen($path));
+                $componentName = trim($componentName, '\\/');
+                $componentName = strtr($componentName, '/', '\\');
+                $componentName = substr($componentName, 0, -strlen($componentExtension));
+
+                $methodName = $possibleMethodName;
                 
                 return $possibleComponentFile;
             }
+            
         }
 
         //No component found :s
@@ -109,6 +111,7 @@ class Component implements ComponentInterface
     
     /**
      * Prepare the path for the retrieve static method.
+     * It consists in triming the given path and check if it exists.
      * If the given path doesn't exists, it will throw an exception
      * @param string $path the path to prepare
      * @return string
@@ -124,6 +127,16 @@ class Component implements ComponentInterface
     
     /**
      * Prepare the request and method for the retrieve static method.
+     * 
+     * It consists in triming, extracting, and performing some various string operations on the given request
+     * to identify the 'request' part and the 'method' part in the given request.
+     * 
+     * For example:
+     * - for a 'root' request ("/"), the 'request' part will be $defaultComponent, 
+     *   and the method will be $defaultMethod.     * 
+     * - For something like "/users/list", 'request' will be "users", and 'method' will be "list".
+     * - "/users" => 'request' == "users", 'method' == $defaultMethod
+     *  
      * Will throw exceptions if no request or method can be computed.
      * @param string $request the original request will be overriden with the real request part of the given string
      * @param string $method the method of the component to call
@@ -132,11 +145,14 @@ class Component implements ComponentInterface
      * @throws Exception\KntFrameworkException
      */
     private static function _prepareRequestAndMethod(&$request, &$method, $defaultComponent, $defaultMethod) {
+        
         $request    = trim($request, '/');
         $method     = trim(substr($request, strrpos($request, '/')), '/');
         $request    = substr($request, 0, strrpos($request, '/'));
 
         if (strlen($request) == 0 && strlen($method) > 0) {
+            //We had something like "/users", but previously we set the method 
+            //with "users" and the request to an empty string. We fix that.
             $request    = $method;
             $method     = $defaultMethod;
         }
@@ -144,11 +160,12 @@ class Component implements ComponentInterface
         if (!$request && $defaultComponent === null) {
             throw new Exception\KntFrameworkException('No component requested');
         }
-        $request    = $request  ?: $defaultComponent;
         
         if (!$method && $defaultMethod === null) {
             throw new Exception\KntFrameworkException('No method requested');
         }
+        
+        $request    = $request  ?: $defaultComponent;
         $method     = $method   ?: $defaultMethod;
     }
     
@@ -159,33 +176,49 @@ class Component implements ComponentInterface
      * @param string $request the request asking for a component
      * @param string $componentExtension extension of the components
      * @param string $method the method name of the component to call
-     * @param string $defaultMethod the default method
-     * @param string $defaultComponent the default component
-     * @return array
+     * @param string $defaultMethod the default method if no method specified
+     * @param string $defaultComponent the default component if no component specified
+     * @return array 
+     * an array in which the keys are the proposition for file names, and
+     * the values are the proposition for method names
      */
     private static function _preparePossibleComponentFiles($path, $request, $componentExtension, $method, $defaultMethod, $defaultComponent) {
         $possibleComponentFiles = array();
+        
+        //Imagine "request" == "users", "method" == "list", "defaultMethod" == "index", and "defaultComponent" == "Index"
+        
+        //First, the more logical proposition
+        //The component is "users.php" and the method is "Users::list()"
         $possibleComponentFiles[$path . '/' . $request . $componentExtension] = $method;
         
+        //Maybe the "method" is actually the component name
+        //The component is "users/list.php" and the method is "Users\List::index()"
         if ($defaultMethod !== null) {
             $possibleComponentFiles[$path . '/' . $request . '/' . $method . $componentExtension] = $defaultMethod;
         }
         
+        //Maybe the requested component was actually a requested path, and 
+        //the actual desired request is the default component
+        //The component is "users/Index.php" and the method is "Users\Index::index()"
         if ($defaultComponent !== null) {
             $possibleComponentFiles[$path . '/' . $request . '/' . $defaultComponent . $componentExtension] = $method;
         }
         
+        //Maybe "request" + "/" + "method" was actually a requested path, and
+        //the actual desired request is the default method of the default component
+        //The component is "users/list/Index.php" and the method "Users\List\Index::index()"
         if ($defaultMethod !== null && $defaultComponent !== null) {
             $possibleComponentFiles
                     [$path . '/' . $request . '/' . $method . '/' . $defaultComponent . $componentExtension]
                     = $defaultMethod;
         }
+        
         return $possibleComponentFiles;
     }
     
     /**
      * Invoke the specified method of the current component.
-     * If the method as some arguments, we will try to bind them with the component datas.
+     * If the method has some arguments, we will try to bind them with the component datas.
      * 
      * @param string $method the method of the component to invoke
      */
@@ -205,31 +238,46 @@ class Component implements ComponentInterface
                     );
         }
 
-        $args       = array();
-        $parameters = $reflection->getParameters();
-
-        foreach ($parameters as $parameter) {
-
-            if ($parameter->canBePassedByValue()) {
-
-                $arg = $this->getData()->get($parameter->getName(), null);
-                if ($arg === null && $parameter->isDefaultValueAvailable()) {
-                    $arg = $parameter->getDefaultValue();
-                }
-                
-                $args[] = $arg;
-
-            } else {
-                throw new Exception\KntFrameworkException("{$parameter->getName()} cannot be passed by reference");
-            }
-
-
-        }
+        $args = $this->_bind($reflection);
 
         $reflection->invokeArgs($this, $args);
 
     }
 
+    /**
+     * Bind the parameter of the given reflection method
+     * with the values retrieved from the data of the component.
+     * @param \ReflectionMethod $reflection
+     * @return array
+     * @throws Exception\KntFrameworkException
+     */
+    private function _bind(\ReflectionMethod $reflection) {
+        $args       = array();
+        $parameters = $reflection->getParameters();
+
+        foreach ($parameters as $parameter) {
+
+            if (!$parameter->canBePassedByValue()) {
+                throw new Exception\KntFrameworkException("{$parameter->getName()} cannot be passed by reference");
+            }
+
+            $arg = $this->getData()->get($parameter->getName(), null);
+            if ($arg === null && $parameter->isDefaultValueAvailable()) {
+                $arg = $parameter->getDefaultValue();
+            }
+
+            $args[] = $arg;
+
+        }
+        
+        return $args;
+    }
+    
+    /**
+     * The magic :p
+     * @param type $method
+     * @throws Exception\KntFrameworkException
+     */
     public function __invoke($method = null) {
         
         if ($method === null && $this->getMethod() === null) {

@@ -251,7 +251,7 @@ class Component extends atoum\test
         $methodName = '';
         $componentFile = Core\Component\Component::retrieve('/Home/referencedParameter', SAMPLE_PATH, $compName, $methodName);
         require ($componentFile);
-        $compName = PROJECT_NAMESPACE . $compName;
+        $compName = PROJECT_NAMESPACE . '\\' . $compName;
         $component = new $compName($frameworkMock, $methodName, $collectionMock);
         
         $this
@@ -276,7 +276,7 @@ class Component extends atoum\test
         $methodName = '';
         $componentFile = Core\Component\Component::retrieve('/Home/privateMethod', SAMPLE_PATH, $compName, $methodName);
         require ($componentFile);
-        $compName = PROJECT_NAMESPACE . $compName;
+        $compName = PROJECT_NAMESPACE . '\\' . $compName;
         $component = new $compName($frameworkMock, $methodName, $collectionMock);
         
         $this

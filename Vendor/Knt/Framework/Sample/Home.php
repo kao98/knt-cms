@@ -27,6 +27,8 @@ class Home extends \Knt\Framework\Core\Component\View {
 
     public function index() {
         
+        var_dump($this);
+        
         echo 'Hello Index!';
         $session = new \Knt\Framework\Core\Session();
         $post = \Knt\Framework\Framework::getInstance()->getRequest()->getPostedData();
@@ -41,7 +43,7 @@ class Home extends \Knt\Framework\Core\Component\View {
         }
         
         echo '
-            <a href="index.php/Sample_1/">Sample #1</a>
+            <a href="/index.php/Sample_1/">Sample #1</a>
             <form method="POST" action="' . Listener::add('Controller/action') . '">
                 <input type="text" name="input" value="'.$session->get('the_test', '').'" />
                 <input type="submit" />

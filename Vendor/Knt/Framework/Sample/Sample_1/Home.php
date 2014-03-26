@@ -18,7 +18,7 @@ namespace Knt\Framework\Sample\Sample_1;
  *
  * @author Aurelien
  */
-class Home extends Knt\Framework\Sample\Sample_1\BaseView {
+class Home extends \Knt\Framework\Sample\Sample_1\BaseView {
 
     public function index() {
         echo 'This is sample #1';

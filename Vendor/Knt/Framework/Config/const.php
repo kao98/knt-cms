@@ -32,7 +32,7 @@ DEFINED('FRAMEWORK_PATH')   OR DEFINE('FRAMEWORK_PATH',     __DIR__ . '/..');
 /**
  * Base namespace of the project
  */
-DEFINED('PROJECT_NAMESPACE') OR DEFINE('PROJECT_NAMESPACE', '\Knt\Framework\Sample\\');
+DEFINED('PROJECT_NAMESPACE') OR DEFINE('PROJECT_NAMESPACE', '\Knt\Framework\Sample');
 
 /**
  * The path where to find the views.
