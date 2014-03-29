@@ -17,10 +17,6 @@ namespace Knt\Framework\Core\Routeur;
  *
  * @author Aurelien
  */
-interface RouteurInterface {
-    //put your code here
-    public function addRoute(RouteInterface $route);
-    public function getRoute($uri);
-    public function exists($uri);
-    
+interface AutomatedRouteurInterface extends RouteurInterface {
+    public function search($uri, $path, $extension);
 }

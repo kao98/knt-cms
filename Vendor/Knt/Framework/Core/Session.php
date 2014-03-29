@@ -12,8 +12,11 @@
  */
 
 namespace Knt\Framework\Core;
-use \Knt\Framework\Core\Collection;
-use \Knt\Framework\Exception;
+
+use
+    \Knt\Framework\Core\Collection,
+    \Knt\Framework\Exception
+;
 
 /**
  * Session.php

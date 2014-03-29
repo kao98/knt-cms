@@ -11,16 +11,17 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-namespace Knt\Framework\Core\Routeur;
+namespace Knt\Framework\Core\Component;
 
-/**
- *
- * @author Aurelien
- */
-interface RouteurInterface {
-    //put your code here
-    public function addRoute(RouteInterface $route);
-    public function getRoute($uri);
-    public function exists($uri);
-    
+use
+    \Knt\Framework\Core\CollectionInterface
+;
+
+interface ControllerInterface extends ComponentInterface
+{
+    public function call($action = null);
+
+    public function setPostedData(CollectionInterface $data);
+
+    public function getPostedData();
 }

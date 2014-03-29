@@ -210,12 +210,18 @@ class Framework
             return $query;
         }
 
-        if ($componentType !== self::COMPONENT_TYPE_VIEW) {
-            return $this->_retrieveControllerRouteUri($query);
+        if (is_subclass_of($routeur, 'Knt\Framework\Core\Routeur\AutomatedRouteurInterface')) {
+
+            if ($componentType !== self::COMPONENT_TYPE_VIEW) {
+                return $this->_retrieveControllerRouteUri($query);
+            }
+
+            return $this->_retrieveViewRouteUri($query);
+              
         }
         
-        return $this->_retrieveViewRouteUri($query);
-              
+        //Ok. Surrender :-(
+        throw new Exception\KntFrameworkException('Not Found', 404);  
     }
     
     /**
@@ -280,7 +286,7 @@ class Framework
         
         if ($routeur == null) {
 
-            $this->_routeur = new Routeur\Routeur(true);
+            $this->_routeur = new Routeur\AutomatedRouteur;
         
         } else {
         

@@ -86,7 +86,7 @@ class Collection implements CollectionInterface
      * Search into an array for an index. Perform a deep search (look for arrays into arrays) if the
      * index is a string containing brackets
      *
-     * @param array &$array The array to search in
+     * @param array $array The array to search in
      * @param $index The index to search in the array
      * @param $default The default value to return if the search fail. Default null.
      * @return mixed The desired value. $default if $index can't be found
@@ -158,6 +158,7 @@ class Collection implements CollectionInterface
     public function add($value) {
         
         $this->_dataContainer[] = $value;
+        
         end($this->_dataContainer);
         $key = key($this->_dataContainer);
         reset($this->_dataContainer);

@@ -12,13 +12,11 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use \Knt\Framework\Framework;
-use \Knt\Framework\Core\CollectionInterface;
 
-interface ControllerInterface extends ComponentInterface
-{
-    
-}
+use
+    \Knt\Framework\Framework,
+    \Knt\Framework\Core\CollectionInterface
+;
 
 /**
  * Controller.php
@@ -44,10 +42,10 @@ class Controller extends Component implements ControllerInterface
     public function __construct(Framework $frameworkInstance, $action, CollectionInterface $postedData = null) {
         
         parent::__construct(
-                $frameworkInstance, 
-                $action, 
-                $postedData ?: $frameworkInstance->getRequest()->getPostedData()
-                );
+            $frameworkInstance, 
+            $action, 
+            $postedData ?: $frameworkInstance->getRequest()->getPostedData()
+        );
         
     }
     

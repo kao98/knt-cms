@@ -12,8 +12,11 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use \Knt\Framework\Framework;
-use \Knt\Framework\Core\CollectionInterface;
+
+use
+    \Knt\Framework\Framework,
+    \Knt\Framework\Core\CollectionInterface
+;
 
 /**
  * View.php
@@ -42,10 +45,10 @@ class View extends Component implements ViewInterface
     public function __construct(Framework $frameworkInstance, $method = null, CollectionInterface $queriedData = null) {
         
         parent::__construct(
-                $frameworkInstance, 
-                $method ?: VIEWS_INDEX, 
-                $queriedData ?: $frameworkInstance->getRequest()->getQueriedData()
-                );
+            $frameworkInstance, 
+            $method         ?: VIEWS_INDEX, 
+            $queriedData    ?: $frameworkInstance->getRequest()->getQueriedData()
+        );
         
     }
     
@@ -59,7 +62,10 @@ class View extends Component implements ViewInterface
      */
     public function render($method = null) {
 
-        $methodToRender = $method ?: $this->getMethod() ?: VIEWS_INDEX;
+        $methodToRender = 
+            $method 
+            ?: $this->getMethod() 
+            ?: VIEWS_INDEX;
 
         $this->invoke($methodToRender);
 

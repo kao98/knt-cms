@@ -1,9 +1,14 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * knt-cms: another Content Management System (http://www.kaonet-fr.net/cms)
+ * 
+ * Licensed under The MIT License
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * @link          http://www.kaonet-fr.net/cms
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
 namespace Knt\Framework\Core\Routeur;
@@ -13,27 +18,20 @@ namespace Knt\Framework\Core\Routeur;
  *
  * @author Aurelien
  */
-class Routeur {
+class Routeur implements RouteurInterface {
     
-    private $_automatic = false;
     private $_routes    = array();
-    
-    public function __construct($automatic = false) {
-        $this->_automatic = $automatic;
-    }
     
     //put your code here
     public function addRoute(RouteInterface $route) {
         $this->_routes[$route->getUri()] = $route;
     }
     
-    public function exists($uri, $path = VIEWS_PATH, $extension = VIEWS_EXTENSION) {
+    public function exists($uri) {
         
         if (array_key_exists($uri, $this->_routes)) {
             return true;
-        } elseif ($this->_automatic) {
-            return $this->_automaticExists($uri, $path, $extension);
-        }
+        } 
         
         return false;
         
@@ -48,24 +46,4 @@ class Routeur {
         
     }
     
-    public function _automaticExists($uri, $path, $extension) {
-        
-        $path = rtrim($path, '\\/');
-        
-        if (is_dir($path)) {
-
-            $uriParts       = explode('/', trim($uri, '/'));
-            $methodName     = array_pop($uriParts);
-            $componentName  = implode('/', $uriParts);
-            $fileName       = $componentName . $extension;
-
-            if (is_file($path . '/' . $fileName)) {
-                $this->addRoute(new Route($uri, $componentName, $methodName));
-                return true;
-            }
-        
-        }
-        
-        return false;
-    }
 }

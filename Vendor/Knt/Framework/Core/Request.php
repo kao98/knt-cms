@@ -62,7 +62,8 @@ class Request implements RequestInterface
             ->setQueriedPath($queriedPath)
             ->setMethod($method)
             ->setQueriedData($queriedData)
-            ->setPostedData ($postedData );
+            ->setPostedData ($postedData )
+        ;
         
     }
 
@@ -96,7 +97,7 @@ class Request implements RequestInterface
      */
     protected function _retrieveQueriedPath() {
 
-        return isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '/';
+        return filter_input(INPUT_SERVER, 'PATH_INFO', FILTER_SANITIZE_URL) ?: '/';
 
     }
     

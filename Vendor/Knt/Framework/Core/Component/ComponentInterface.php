@@ -12,8 +12,11 @@
  */
 
 namespace Knt\Framework\Core\Component;
-use \Knt\Framework\Framework;
-use \Knt\Framework\Core\CollectionInterface;
+
+use
+    \Knt\Framework\Framework,
+    \Knt\Framework\Core\CollectionInterface
+;
 
 /**
  * ComponentInterface.php
