@@ -40,6 +40,10 @@ use
  */
 class Framework
 {
+    
+    const COMPONENT_TYPE_VIEW       = 'view';
+    const COMPONENT_TYPE_CONTROLLER = 'controller';
+    
     protected static    $_instance  = null; //Singleton instance
     protected           $_request   = null; //The request instance
     protected           $_routeur   = null; //The routeur associated to the framework
@@ -89,7 +93,7 @@ class Framework
         }
         
         return self::$_instance 
-            ?: self::$_instance = new Framework($request, $routeur);        
+            ?: self::$_instance = new Framework($routeur, $request);
         
     }
     
@@ -107,13 +111,22 @@ class Framework
             $startingTime = microtime(true); //TODO: refactor that
         }
         
-        $instance   = self::getInstance($request, $routeur);
+        $instance = self::getInstance($routeur, $request);
         
-        if ($instance->getRequest()->getMethod() !== RequestInterface::METHOD_GET) {
-            $instance->loadController()->call();
-            //TODO: retrieve the view from the controller just called then render it
+        if (RequestInterface::METHOD_GET === $instance->request->getMethod()) {
+            
+            $instance
+                ->loadComponent()
+                ->render()
+            ;
+            
         } else {
-            $instance->loadView()->render();
+            
+            $instance
+                ->loadComponent(self::COMPONENT_TYPE_CONTROLLER)
+                ->call()
+            ;
+            //TODO: retrieve the view from the controller just called then render it
         }
         
         if (DEBUG_LEVEL > 0) {
@@ -122,137 +135,127 @@ class Framework
         }
         
     }
-    
-    public function loadController($controllerQuery = null) {
-        
-        $request    = trim($controllerQuery ?: $this->queriedPath, '/');
-        $method     = trim(substr($request, strrpos($request, '/')), '/');
-        $request    = substr($request, 0, strrpos($request, '/'));
 
-        if (strlen($request) == 0 && strlen($method) > 0) {
-            //We had something like "/users", but previously we set the method 
-            //with "users" and the request to an empty string. We fix that.
-            $request    = $method;
-            $method     = $defaultMethod;
-        }
-
-        if (!$request) {
-            throw new Exception\KntFrameworkException('No component requested');
-        }
+    /**
+     * Retrieve the URI of the route that lead to a controller
+     * that can process the given query.
+     * @param string $query the query string that need a controller to be processed
+     * @return string the uri of one route that lead to a controller
+     * @throws Exception\KntFrameworkException 404 if no route can be find for the given query.
+     */
+    private function _retrieveControllerRouteUri($query) {
         
-        if (!$method) {
-            throw new Exception\KntFrameworkException('No method requested');
+        if (!
+            $this
+                ->getRouteur()
+                ->exists($query, CONTROLLERS_PATH, CONTROLLERS_EXTENSION)
+            ) {
+            
+            throw new Exception\KntFrameworkException('Not Found', 404);
+            
         }
         
-        $class = $this->getProjectNamespace() . strtr($request, '/', '\\');
-        if (is_subclass_of("$class", 'Knt\Framework\Core\Component\ControllerInterface')) {
-
-            $component = new $class($this, $method);
-
-            return $component;
-
-        } else {
-            throw new Exception\KntFrameworkException('Bad request.', 400);
-        }
-    }
-
-    public function loadView($viewQuery = null) {
-        
-        $routeur = new Core\Routeur\Routeur(true);
-        
-        if (!$viewQuery) {
-            $viewQuery = $this
-                    ->getRequest()
-                    ->getQueriedPath()
-            ;
-        }
-        
-        if (!$routeur->exists($viewQuery)) {
-            if ($routeur->exists(rtrim($viewQuery, '/') . '/' . VIEWS_INDEX)) {
-                $viewQuery = rtrim($viewQuery, '/') . '/' . VIEWS_INDEX;
-            } elseif($routeur->exists(rtrim($viewQuery, '/') . '/' . DEFAULT_VIEW . '/' . VIEWS_INDEX)) {
-                $viewQuery = rtrim($viewQuery, '/') . '/' . DEFAULT_VIEW . '/' . VIEWS_INDEX;
-            }
-        }
-        
-        $route = $routeur->getRoute($viewQuery);
-        $class = $this->getProjectNamespace() . strtr($route->getComponentName(), '/', '\\');
-        
-        if (is_subclass_of("$class", 'Knt\Framework\Core\Component\ViewInterface')) {
-
-            $component = new $class($this, $route->getMethodName());
-
-            return $component;
-
-        } else {
-            throw new Exception\KntFrameworkException('Bad request.', 400);
-        }
+        return $query;
     }
     
     /**
-     * Return the instance of the requested component.
-     * The component is initialized, ready to go.
-     * 
-     * @param string $componentType the type of the component ('View' or 'Controller')
-     * @param string $requestedComponent (default null) 
-     * the requested path that should lead to the component.
-     * If null, will try to use the queried path
-     * @return mixed the instance of the requested component.
-     * @exception todo
+     * Retrieve the URI of the route that can
+     * return the desired view identified by $query.
+     * @param string $query the query string that ask for a view
+     * @return string the uri of one route that lead to a view
+     * @throws Exception\KntFrameworkException 404 if no route can be find for the given query.
      */
-    public function getComponent($componentType, $requestedComponent = null) {
-
-        $class      = null;
-        $method     = null;
-        $componentType = ucfirst(strtolower($componentType));
+    private function _retrieveViewRouteUri($query) {
         
-        switch ($componentType) {
-            case 'View':
-                $componentFile = 
-                    Core\Component\Component::retrieve(
-                            $requestedComponent ?: $this->queriedPath, 
-                            VIEWS_PATH, 
-                            $class, 
-                            $method, 
-                            VIEWS_EXTENSION, 
-                            DEFAULT_VIEW, 
-                            VIEWS_INDEX
-                            );
-                break;
-            case 'Controller':
-                $componentFile = 
-                    Core\Component\Component::retrieve(
-                            $requestedComponent ?: $this->queriedPath, 
-                            CONTROLLERS_PATH, 
-                            $class, 
-                            $method, 
-                            CONTROLLERS_EXTENSION
-                            );
-                break;
-            default:
-                throw new Exception\KntFrameworkException('Unrecognized component type');
+        $exists = function($uri) {
+            return $this
+                ->getRouteur()
+                ->exists($uri, VIEWS_PATH, VIEWS_EXTENSION)
+            ;
+        };
+        
+        $query  = rtrim($query, '/'); //Required to avoid 'double /' in the uri (think about the 'root' query)
+        $uri1   = $query . '/' . VIEWS_INDEX;
+        $uri2   = $query . '/' . DEFAULT_VIEW . '/' . VIEWS_INDEX;
+        
+        if ($exists($uri1)) {
+            return $uri1;
+        }
+   
+        if ($exists($uri2)) {
+            return $uri2;
         }
         
-        if ($componentFile !== null) {
-            
-            include_once $componentFile;
-            $class = $this->getProjectNamespace() . $class;
-            if (is_subclass_of("$class", 'Knt\Framework\Core\Component\\' . $componentType . 'Interface')) {
-                
-                $component = new $class($this, $method);
-                
-                return $component;
-                
-            } else {
-                throw new Exception\KntFrameworkException('Bad request.', 400);
-            }
-
-        } else {
-            throw new Exception\KntFrameworkException('Requested component not found.', 404);
-        }
-
+        //Ok. Surrender :-(
+        throw new Exception\KntFrameworkException('Not Found', 404);  
+        
     }
     
+    /**
+     * Retrieve a route that lead to a component
+     * that can handle the the given query.
+     * This is usefull when used with an 'automated' routeur.
+     * @see Routeur\Routeur for more informations about routeurs and 'automated' routeurs
+     * @param string $query a query string that ask for a component
+     * @param string $componentType the type of the component we are looking for (usefull with 'automated' routeurs)
+     * @return string the URI of one route that lead to a component ready to process the query.
+     * @throws Exception\KntFrameworkException 404 if no route can be found.
+     */
+    public function retrieveRouteUri($query, $componentType = self::COMPONENT_TYPE_VIEW) {
+        
+        $routeur = $this->getRouteur();
+        
+        //Caution: this basic call is required with an non-automated (static) routeur
+        if ($routeur->exists($query)) {
+            return $query;
+        }
+
+        if ($componentType !== self::COMPONENT_TYPE_VIEW) {
+            return $this->_retrieveControllerRouteUri($query);
+        }
+        
+        return $this->_retrieveViewRouteUri($query);
+              
+    }
+    
+    /**
+     * Load a component given it's type and a query
+     * @param string $componentType (default self::COMPONENT_TYPE_VIEW) type of the component.
+     * Can be self::COMPONENT_TYPE_VIEW, or self::COMPONENT_TYPE_CONTROLLER.
+     * @param string $query (default null) a query resulting in a component.
+     * If null, will get the request for the curent framework instance.
+     * @return \Knt\Framework\Core\Component\*Interface an instance implementing a component interface
+     * @throws Exception\KntFrameworkException 
+     * 404 if no route to the component can be found
+     * 400 if a the component has been queried in a wrong way, or the query don't match to a valid component.
+     */
+    public function loadComponent($componentType = self::COMPONENT_TYPE_VIEW, $query = null) {
+        
+        if (!$query) {
+            $query = $this
+                ->getRequest()
+                ->getQueriedPath()
+            ;
+        }
+        
+        $routeUri   = $this->retrieveRouteUri($query, $componentType);
+        $route      = $this->getRouteur()->getRoute($routeUri);
+        $class      = $this->getProjectNamespace() . strtr($route->getComponentName(), '/', '\\');
+        $interface  = 'Knt\Framework\Core\Component\\' . ucfirst($componentType) . 'Interface';
+
+        if (is_subclass_of("$class", $interface)) {
+            return new $class($this, $route->getMethodName());
+        }
+        
+        throw new Exception\KntFrameworkException('Bad request.', 400);
+    }
+    
+    /**
+     * Return a formated version of the PROJECT_NAMESPACE ready to be used.
+     * These method ensure that PROJECT_NAMESPACE starts and ends with one and
+     * only one back-slash.
+     * @return string
+     */
     protected function getProjectNamespace() {
         return sprintf("\\%s\\", trim(PROJECT_NAMESPACE, '\\/'));
     }
@@ -277,7 +280,7 @@ class Framework
         
         if ($routeur == null) {
 
-            $this->_routeur = new Routeur\Routeur;
+            $this->_routeur = new Routeur\Routeur(true);
         
         } else {
         
