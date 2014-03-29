@@ -135,7 +135,7 @@ class Request implements RequestInterface
      */
     protected function _retrieveMethod() {
 
-        return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'get';
+        return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::METHOD_GET;
 
     }
     

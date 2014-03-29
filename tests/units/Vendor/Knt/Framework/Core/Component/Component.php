@@ -245,7 +245,7 @@ class Component extends atoum\test
     public function testInvoke_exceptIfArgumentPassedByReference() {
         
         $frameworkMock = new \mock\Knt\Framework\Framework;
-        $collectionMock = new \mock\Knt\Framework\Core\CollectionInterface;
+        $collectionMock = new \mock\Knt\Framework\Core\Collection;
         
         $compName = '';
         $methodName = '';
@@ -270,7 +270,7 @@ class Component extends atoum\test
     public function testInvoke_exceptIfNotPublic() {
         
         $frameworkMock = new \mock\Knt\Framework\Framework;
-        $collectionMock = new \mock\Knt\Framework\Core\CollectionInterface;
+        $collectionMock = new \mock\Knt\Framework\Core\Collection;
         
         $compName = '';
         $methodName = '';

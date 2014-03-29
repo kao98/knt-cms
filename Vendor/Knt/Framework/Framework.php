@@ -19,7 +19,10 @@ require_once 'Config/const.php';
 
 /* Ok, we can continue with the required files inclusion, the uses of the required namespaces, and everything */
 
-use \Knt\Framework\Core\RequestInterface;
+use 
+    \Knt\Framework\Core\RequestInterface,
+    \Knt\Framework\Core\Routeur
+;
 
 /**
  * Framework.php
@@ -38,7 +41,8 @@ use \Knt\Framework\Core\RequestInterface;
 class Framework
 {
     protected static    $_instance  = null; //Singleton instance
-    protected           $_request   = null; //Request object
+    protected           $_request   = null; //The request instance
+    protected           $_routeur   = null; //The routeur associated to the framework
 
     /**
      * Constructor. Initialize a new instance of the Framework with the given Request object.
@@ -46,9 +50,12 @@ class Framework
      * @param RequestInterface $request The request that will be handled by the framework. Default null.
      * If null, the handled request will be initialize with some default values.
      */
-    private function __construct(RequestInterface $request = null) {
+    private function __construct(Routeur\RouteurInterface $routeur = null, RequestInterface $request = null) {
 
-        $this->setRequest($request);
+        $this
+            ->setRequest($request)
+            ->setRouteur($routeur)
+        ;
 
     }
 
@@ -60,19 +67,29 @@ class Framework
     /**
      * Singleton implementation: return the Framework instance.
      * Initialize / set the request of the Framework instance with the given request object.
+     * Initialize / set the routeur of the Framework instance with the given routeur object.
      * 
      * @param RequestInterface $request (default null) A request wich will be passed to the Framework instance.
      * If null, and no instance of a Framework exists, 
      * the instance will be initialized with a new default Request object.
+     * @param Routeur\RouterInterface $routeur (default null) A routeur to use with the framework.
+     * If null, and no instance of the framework exists,
+     * a new instance will be initialized with a new default Routeur object.
      * @return Framework the singleton instance 
      */
-    public static function getInstance(RequestInterface $request = null) {
+    public static function getInstance(Routeur\RouteInterface $routeur = null, RequestInterface $request = null) {
         
-        if (self::$_instance !== null && $request !== null) {
-            self::$_instance->setRequest($request);
+        if (self::$_instance !== null) {
+            if ($request !== null) {
+                self::$_instance->setRequest($request);
+            }
+            if ($routeur !== null) {
+                self::$_instance->setRouteur($routeur);
+            }
         }
         
-        return self::$_instance ?: self::$_instance = new Framework($request);        
+        return self::$_instance 
+            ?: self::$_instance = new Framework($request, $routeur);        
         
     }
     
@@ -84,19 +101,19 @@ class Framework
      * a new default Request object.
      * @return Framework The instancied Framework instance.
      */
-    public static function handleRequest(RequestInterface $request = null) {
+    public static function handleRequest(Routeur\RouteurInterface $routeur = null, RequestInterface $request = null) {
         
         if (DEBUG_LEVEL > 0) {
             $startingTime = microtime(true); //TODO: refactor that
         }
         
-        $instance   = self::getInstance($request);
+        $instance   = self::getInstance($request, $routeur);
         
         if ($instance->getRequest()->getMethod() !== RequestInterface::METHOD_GET) {
-            $instance->getComponent('Controller')->call();
+            $instance->loadController()->call();
             //TODO: retrieve the view from the controller just called then render it
         } else {
-            $instance->getComponent('View')->render();
+            $instance->loadView()->render();
         }
         
         if (DEBUG_LEVEL > 0) {
@@ -105,7 +122,76 @@ class Framework
         }
         
     }
+    
+    public function loadController($controllerQuery = null) {
+        
+        $request    = trim($controllerQuery ?: $this->queriedPath, '/');
+        $method     = trim(substr($request, strrpos($request, '/')), '/');
+        $request    = substr($request, 0, strrpos($request, '/'));
 
+        if (strlen($request) == 0 && strlen($method) > 0) {
+            //We had something like "/users", but previously we set the method 
+            //with "users" and the request to an empty string. We fix that.
+            $request    = $method;
+            $method     = $defaultMethod;
+        }
+
+        if (!$request) {
+            throw new Exception\KntFrameworkException('No component requested');
+        }
+        
+        if (!$method) {
+            throw new Exception\KntFrameworkException('No method requested');
+        }
+        
+        $class = $this->getProjectNamespace() . strtr($request, '/', '\\');
+        if (is_subclass_of("$class", 'Knt\Framework\Core\Component\ControllerInterface')) {
+
+            $component = new $class($this, $method);
+
+            return $component;
+
+        } else {
+            throw new Exception\KntFrameworkException('Bad request.', 400);
+        }
+    }
+
+    public function loadView($viewQuery = null) {
+        
+        $routeur = new Core\Routeur\Routeur;
+        
+        $routeur->addRoute(new Core\Routeur\Route('/Home/index', 'Home', 'index'));
+        $routeur->addRoute(new Core\Routeur\Route('/Sample_1/Home/index', 'Sample_1/Home', 'index'));
+        
+        if (!$viewQuery) {
+            $viewQuery = $this
+                    ->getRequest()
+                    ->getQueriedPath()
+            ;
+        }
+        
+        if (!$routeur->exists($viewQuery)) {
+            if ($routeur->exists(rtrim($viewQuery, '/') . '/' . VIEWS_INDEX)) {
+                $viewQuery = rtrim($viewQuery, '/') . '/' . VIEWS_INDEX;
+            } elseif($routeur->exists(rtrim($viewQuery, '/') . '/' . DEFAULT_VIEW . '/' . VIEWS_INDEX)) {
+                $viewQuery = rtrim($viewQuery, '/') . '/' . DEFAULT_VIEW . '/' . VIEWS_INDEX;
+            }
+        }
+        
+        $route = $routeur->getRoute($viewQuery);
+        $class = $this->getProjectNamespace() . strtr($route->getComponentName(), '/', '\\');
+        
+        if (is_subclass_of("$class", 'Knt\Framework\Core\Component\ViewInterface')) {
+
+            $component = new $class($this, $route->getMethodName());
+
+            return $component;
+
+        } else {
+            throw new Exception\KntFrameworkException('Bad request.', 400);
+        }
+    }
+    
     /**
      * Return the instance of the requested component.
      * The component is initialized, ready to go.
@@ -172,6 +258,38 @@ class Framework
     
     protected function getProjectNamespace() {
         return sprintf("\\%s\\", trim(PROJECT_NAMESPACE, '\\/'));
+    }
+    
+    /**
+     * Return the routeur of the current Framework object
+     *
+     * @return Routeur\RouteurInterface The routeur corresponding to the current Framework instance
+     */
+    public function getRouteur() {
+        
+        return $this->_routeur;
+    
+    }
+
+    /**
+     * Set the routeur for the current Framework instance
+     * 
+     * @param Routeur\RouteurInterface $routeur (default null) the routeur object. If null, will initialize a default routeur. 
+     */
+    public function setRouteur(Routeur\RouteurInterface $routeur = null) {
+        
+        if ($routeur == null) {
+
+            $this->_routeur = new Routeur\Routeur;
+        
+        } else {
+        
+            $this->_routeur = $routeur;
+        
+        }
+        
+        return $this;
+        
     }
     
     /**
