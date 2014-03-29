@@ -15,15 +15,28 @@ namespace Knt\Framework\Core\Routeur;
  */
 class Routeur {
     
-    private $_routes = array();
+    private $_automatic = false;
+    private $_routes    = array();
+    
+    public function __construct($automatic = false) {
+        $this->_automatic = $automatic;
+    }
     
     //put your code here
     public function addRoute(RouteInterface $route) {
         $this->_routes[$route->getUri()] = $route;
     }
     
-    public function exists($uri) {
-        return array_key_exists($uri, $this->_routes);
+    public function exists($uri, $path = VIEWS_PATH, $extension = VIEWS_EXTENSION) {
+        
+        if (array_key_exists($uri, $this->_routes)) {
+            return true;
+        } elseif ($this->_automatic) {
+            return $this->_automaticExists($uri, $path, $extension);
+        }
+        
+        return false;
+        
     }
     
     public function getRoute($uri) {
@@ -33,5 +46,26 @@ class Routeur {
         }
         return $this->_routes[$uri];
         
+    }
+    
+    public function _automaticExists($uri, $path, $extension) {
+        
+        $path = rtrim($path, '\\/');
+        
+        if (is_dir($path)) {
+
+            $uriParts       = explode('/', trim($uri, '/'));
+            $methodName     = array_pop($uriParts);
+            $componentName  = implode('/', $uriParts);
+            $fileName       = $componentName . $extension;
+
+            if (is_file($path . '/' . $fileName)) {
+                $this->addRoute(new Route($uri, $componentName, $methodName));
+                return true;
+            }
+        
+        }
+        
+        return false;
     }
 }

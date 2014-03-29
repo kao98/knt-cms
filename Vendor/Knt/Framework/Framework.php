@@ -158,10 +158,7 @@ class Framework
 
     public function loadView($viewQuery = null) {
         
-        $routeur = new Core\Routeur\Routeur;
-        
-        $routeur->addRoute(new Core\Routeur\Route('/Home/index', 'Home', 'index'));
-        $routeur->addRoute(new Core\Routeur\Route('/Sample_1/Home/index', 'Sample_1/Home', 'index'));
+        $routeur = new Core\Routeur\Routeur(true);
         
         if (!$viewQuery) {
             $viewQuery = $this
