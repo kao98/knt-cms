@@ -43,7 +43,9 @@ class Framework
     
     const COMPONENT_TYPE_VIEW       = 'view';
     const COMPONENT_TYPE_CONTROLLER = 'controller';
-    
+    const COMPONENT_TYPE_REST       = 'rest';
+
+
     protected static    $_instance  = null; //Singleton instance
     protected           $_request   = null; //The request instance
     protected           $_routeur   = null; //The routeur associated to the framework
@@ -249,6 +251,10 @@ class Framework
         $class      = $this->getProjectNamespace() . strtr($route->getComponentName(), '/', '\\');
         $interface  = 'Knt\Framework\Core\Component\\' . ucfirst($componentType) . 'Interface';
 
+        //Components may not respond to PSR-0 naming conventions so
+        //we require it manually
+        require_once (VIEWS_PATH . '/' . $route->getComponentName() . VIEWS_EXTENSION);
+        
         if (is_subclass_of("$class", $interface)) {
             return new $class($this, $route->getMethodName());
         }
