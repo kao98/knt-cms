@@ -1,3 +1,12 @@
+#composer related
+/Vendor/composer
+/Vendor/autoload.php
+/composer.lock
+
+#library installed by composer
+/Vendor/Knt/framework
+
+#misc
 /tests/units/reports/models/coverage/
 /tests/units/reports/models/treemap/
 /tests/units/reports/models/configurations/

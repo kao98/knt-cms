@@ -1,0 +1,34 @@
+{
+    "name": "knt/cms",
+    "description": "Yet Another Content Management System",
+    "keywords": ["cms"],
+    "homepage": "http://github.com/kao98/knt-cms",
+    "license": "MIT",
+    
+    "authors": [
+        {
+            "name": "Kao ..98",
+            "email": "kao98@kaonet-fr.net",
+            "homepage": "http://www.kaonet-fr.net"
+        }
+    ],
+    
+    "minimum-stability": "dev", 
+    
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/kao98/knt-framework"
+        }
+    ],
+        
+    "require": {
+        "php": ">=5.3.0",
+        "knt/framework": "0.0.1-alpha"
+    },
+
+    "autoload": {
+        "psr-4": {"Knt\\Cms\\": "Knt/Cms"}
+    }
+    
+}

@@ -24,6 +24,7 @@
  * @author AurÃ©lien Reeves (Kao ..98)
  */
 
+require('Vendor/autoload.php');
 require('Vendor/Knt/Framework/Go.php');
 
 Knt::Go();
